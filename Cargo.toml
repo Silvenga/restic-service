@@ -1,0 +1,14 @@
+[workspace]
+resolver = "3"
+members = [ "restic-sdk","service"]
+
+[workspace.package]
+version = "0.0.0"
+authors = ["Silvenga"]
+repository = "https://github.com/Silvenga/restic-service"
+license = "MIT"
+edition = "2024"
+publish = false
+
+[workspace.dependencies]
+tokio = "1.45.0"
