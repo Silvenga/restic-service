@@ -1,20 +1,26 @@
 use crate::Restic;
-use crate::errors::ResticError;
+use crate::errors::{ResticError, map_exit_code_to_error};
 use crate::parsing::{ResticMessage, parse_restic_message};
 use log::warn;
-use std::ffi::OsStr;
+use pathsearch::find_executable_in_path;
+use std::ffi::{OsStr, OsString};
 use std::io;
 use std::process::{ExitStatus, Stdio};
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::Command;
 
 impl Restic {
-    pub(crate) async fn exec<I, S>(&self, arguments: I) -> Result<ExecStatus, ResticError>
+    pub(crate) async fn exec<I, S, F>(
+        &self,
+        arguments: I,
+        mut on_message: F,
+    ) -> Result<(), ResticError>
     where
         I: IntoIterator<Item = S>,
         S: AsRef<OsStr>,
+        F: FnMut(ResticMessage),
     {
-        let start = async || -> Result<ExecStatus, io::Error> {
+        let start = async || -> Result<ExitStatus, io::Error> {
             let binary_path = Self::get_binary_path()?;
             let mut process = Command::new(binary_path)
                 .args(arguments)
@@ -25,47 +31,68 @@ impl Restic {
                 .kill_on_drop(true)
                 .spawn()?;
 
-            let mut messages: Vec<ResticMessage> = Vec::new();
             let stdout = process.stdout.take().unwrap();
-            let mut lines = BufReader::new(stdout).lines();
-            while let Some(line) = lines.next_line().await? {
-                match parse_restic_message(&line) {
-                    Ok(e) => messages.push(e),
-                    Err(e) => warn!("Failed to parse message: {:?}", e),
-                }
-            }
-
-            let mut errors: Vec<ResticMessage> = Vec::new();
             let stderr = process.stderr.take().unwrap();
-            let mut lines = BufReader::new(stderr).lines();
-            while let Some(line) = lines.next_line().await? {
-                match parse_restic_message(&line) {
-                    Ok(e) => errors.push(e),
-                    Err(e) => warn!("Failed to parse message: {:?}", e),
+            let mut stdout_lines = BufReader::new(stdout).lines();
+            let mut stderr_lines = BufReader::new(stderr).lines();
+            let mut stdout_complete = false;
+            let mut stderr_complete = false;
+
+            loop {
+                tokio::select! {
+                    stdout_line = stdout_lines.next_line(), if !stdout_complete => {
+                        match stdout_line? {
+                            None => {
+                                stdout_complete = true;
+                                continue;
+                            }
+                            Some(line) => match parse_restic_message(&line) {
+                                Ok(msg) => on_message(msg),
+                                Err(e) => warn!("Ignored failure to parse stdout message: {:?}", e),
+                            },
+                        }
+                    },
+                    stderr_lines = stderr_lines.next_line(), if !stderr_complete => {
+                        match stderr_lines? {
+                            None => {
+                                stderr_complete = true;
+                                continue;
+                            }
+                            Some(line) => match parse_restic_message(&line) {
+                                Ok(msg) => on_message(msg),
+                                Err(e) => warn!("Ignored failure to parse stderr message: {:?}", e),
+                            },
+                        }
+                    },
+                    else => {
+                        break;
+                    }
                 }
             }
 
             let status = process.wait().await?;
-            Ok(ExecStatus {
-                status,
-                messages,
-                errors,
-            })
+            Ok(status)
         };
 
-        match start().await {
-            Ok(result) => Ok(result),
-            Err(io_error) => Err(ResticError::ExecuteFailure(io_error)),
+        let status = start()
+            .await
+            .map_err(|io_error| ResticError::FailedToExecute(io_error))?;
+
+        let code = status.code().ok_or(ResticError::Killed)?;
+
+        match map_exit_code_to_error(code) {
+            Ok(_) => Ok(()),
+            Err(e) => Err(e),
         }
     }
 
-    fn get_binary_path() -> Result<String, std::io::Error> {
-        Ok(String::from("restic"))
+    fn get_binary_path() -> Result<OsString, io::Error> {
+        let Some(exe) = find_executable_in_path("restic") else {
+            return Err(io::Error::new(
+                io::ErrorKind::NotFound,
+                "The restic binary not found in PATH",
+            ));
+        };
+        Ok(exe.into_os_string())
     }
-}
-
-pub struct ExecStatus {
-    pub status: ExitStatus,
-    pub messages: Vec<ResticMessage>,
-    pub errors: Vec<ResticMessage>,
 }

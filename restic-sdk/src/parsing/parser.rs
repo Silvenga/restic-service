@@ -16,7 +16,9 @@ pub enum ResticMessage {
         go_arch: String,
     },
     #[serde(rename = "exit_error")]
-    ExitError { code: i32, message: String },
+    ExitError {
+        // code: i32, message: String
+    },
 }
 
 #[cfg(test)]
@@ -62,10 +64,7 @@ mod tests {
         }"#;
         let result = parse_restic_message(json)?;
 
-        if let ResticMessage::ExitError { code, message } = result {
-            assert_eq!(code, 1);
-            assert_eq!(message, "An error occurred");
-
+        if let ResticMessage::ExitError {} = result {
             Ok(())
         } else {
             panic!("Expected Version message");

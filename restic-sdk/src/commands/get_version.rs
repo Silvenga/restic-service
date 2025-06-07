@@ -1,29 +1,37 @@
+use crate::extensions::errors::IntoResticError;
+use crate::extensions::vec::VecHelpers;
 use crate::parsing::ResticMessage;
 use crate::{Restic, ResticError};
 
 impl Restic {
     pub async fn get_version(&self) -> Result<ResticVersion, ResticError> {
-        let result = self.exec(["version", "--json"]).await?;
+        let mut messages = Vec::new();
 
-        let [version] = result.messages.as_slice() else {
-            panic!("expected single element");
-        };
+        self.exec(["version", "--json"], |message: ResticMessage| {
+            messages.push(message);
+        })
+        .await?;
+
+        let message = messages.into_single().or_restic_processing_error()?;
 
         if let ResticMessage::Version {
             version,
             go_version,
             go_os,
             go_arch,
-        } = version
+            ..
+        } = message
         {
             Ok(ResticVersion {
-                version: version.clone(),
-                go_version: go_version.clone(),
-                go_os: go_os.clone(),
-                go_arch: go_arch.clone(),
+                version,
+                go_version,
+                go_os,
+                go_arch,
             })
         } else {
-            panic!("expected single element");
+            Err(ResticError::UnexpectedResponse(
+                "Expected version message".to_string(),
+            ))
         }
     }
 }
