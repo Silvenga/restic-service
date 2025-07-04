@@ -1,4 +1,3 @@
-use restic_sdk::errors::ResticError;
 use restic_sdk::{Restic, ResticConfig};
 use std::env::temp_dir;
 use std::fs::{create_dir_all, remove_dir_all};
@@ -16,17 +15,25 @@ async fn command_version() {
 }
 
 #[tokio::test]
-async fn command_cat_missing_repository() {
+async fn command_can_open_missing() {
     let repository = VirtualRepository::new();
 
     let restic = repository.get_client();
-    let result = restic.cat("config").await;
+    let result = restic.can_open().await.unwrap();
 
-    match result {
-        Err(ResticError::RepositoryDoesNotExist) => {}
-        Err(err) => panic!("Expected RepositoryDoesNotExist error, got: {err:?}"),
-        Ok(_) => panic!("Expected an error, but got a successful response"),
-    };
+    assert!(!result)
+}
+
+#[tokio::test]
+async fn command_can_open_existing() {
+    let repository = VirtualRepository::new();
+
+    let restic = repository.get_client();
+    restic.init().await.unwrap();
+
+    let result = restic.can_open().await.unwrap();
+
+    assert!(result)
 }
 
 struct VirtualRepository {
@@ -42,16 +49,11 @@ impl VirtualRepository {
     }
 
     pub fn get_client(&self) -> Restic {
-        let path_str = self.path.to_str().unwrap();
+        let repository = self.path.to_str().unwrap();
 
-        let env = vec![
-            ("RESTIC_REPOSITORY".to_owned(), path_str.to_owned()),
-            ("RESTIC_PASSWORD".to_owned(), "test_password".to_owned()),
-        ];
-
-        let config = ResticConfig {
-            environment: env.into_iter().collect(),
-        };
+        let config = ResticConfig::default()
+            .with_repository(repository)
+            .with_password("test_password");
 
         Restic::default().with_config(config)
     }
