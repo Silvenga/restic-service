@@ -7,6 +7,7 @@ type UtcDateTime = DateTime<Utc>;
 #[derive(Deserialize, Debug, Clone, PartialEq)]
 pub struct BackupSummary {
     /// Whether the backup was a dry run
+    #[serde(default)]
     pub dry_run: bool,
     /// Number of new files
     pub files_new: u64,
@@ -97,5 +98,33 @@ mod tests {
         );
         assert_eq!(result.total_duration, 300.0);
         assert_eq!(result.snapshot_id, Some("abc123".to_string()));
+    }
+
+    #[test]
+    fn can_parse_defaults() {
+        let json = r#"{
+          "message_type": "summary",
+          "files_new": 1,
+          "files_changed": 0,
+          "files_unmodified": 0,
+          "dirs_new": 9,
+          "dirs_changed": 0,
+          "dirs_unmodified": 0,
+          "data_blobs": 1,
+          "tree_blobs": 10,
+          "data_added": 6539,
+          "data_added_packed": 4869,
+          "total_files_processed": 1,
+          "total_bytes_processed": 16,
+          "total_duration": 0.6936368,
+          "backup_start": "2025-07-04T17:08:37.6760243-05:00",
+          "backup_end": "2025-07-04T17:08:38.3696541-05:00",
+          "snapshot_id": "c5836c654dff874c2ae8089ea609ad27f3b4acc2c9f7ff17982e38ddadddaeb7"
+        }"#;
+        let message = ResticBackupMessage::parse_message(json).expect("parse should succeed");
+
+        let result = BackupSummary::try_from(message).expect("should convert");
+
+        assert!(!result.dry_run);
     }
 }

@@ -3,7 +3,7 @@ use std::collections::HashSet;
 #[derive(Debug, Clone, Default)]
 pub struct CommandBuilder<'a> {
     verb: Option<&'a str>,
-    value: Option<&'a str>,
+    values: Vec<&'a str>,
     arguments: HashSet<Argument<'a>>,
 }
 
@@ -37,7 +37,12 @@ impl<'a> CommandBuilder<'a> {
     }
 
     pub fn with_value(mut self, value: &'a str) -> Self {
-        self.value = Some(value);
+        self.values = vec![value];
+        self
+    }
+
+    pub fn with_values(mut self, value: impl Iterator<Item = &'a str>) -> Self {
+        self.values = value.collect();
         self
     }
 
@@ -56,7 +61,7 @@ impl<'a> CommandBuilder<'a> {
             }
         }
 
-        if let Some(value) = self.value {
+        for value in self.values {
             full_arguments.push(value.to_owned());
         }
 
