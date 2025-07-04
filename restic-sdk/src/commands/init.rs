@@ -23,4 +23,12 @@ impl Restic {
             Err(error) => Err(ResticError::UnexpectedResponse(error)),
         }
     }
+
+    /// Initializes a new Restic repository if it does not already exist.
+    pub async fn init_if_not_exists(&self) -> Result<Option<Initialized>, ResticError> {
+        match self.can_open().await? {
+            true => Ok(None),
+            false => self.init().await.map(Some),
+        }
+    }
 }

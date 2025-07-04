@@ -1,5 +1,7 @@
 use crate::Restic;
 use crate::errors::{ResticError, map_exit_code_to_error};
+use crate::parsing::ResticMessage;
+use log::warn;
 use pathsearch::find_executable_in_path;
 use std::ffi::OsString;
 use std::fmt::Display;
@@ -9,6 +11,7 @@ use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::Command;
 
 impl Restic {
+    /// Low-level command execution method that allows for custom handling of output messages.
     pub(crate) async fn exec<F>(
         &self,
         arguments: impl IntoIterator<Item = String>,
@@ -82,6 +85,28 @@ impl Restic {
             ));
         };
         Ok(exe.into_os_string())
+    }
+
+    /// Low-level command execution method to invoke Restic with JSON handling.
+    pub(crate) async fn exec_json<P, F>(
+        &self,
+        arguments: impl IntoIterator<Item = String>,
+        mut on_message: F,
+    ) -> Result<(), ResticError>
+    where
+        P: ResticMessage,
+        F: FnMut(P),
+    {
+        self.exec(
+            arguments.into_iter().chain(vec!["--json".to_owned()]),
+            |string, output_type| match P::parse_message(&string) {
+                Ok(message) => on_message(message),
+                Err(err) => {
+                    warn!("Failed to parse {output_type} message '{string}' due to '{err}'")
+                }
+            },
+        )
+        .await
     }
 }
 
