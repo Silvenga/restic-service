@@ -1,24 +1,21 @@
 use crate::Restic;
 use crate::errors::{ResticError, map_exit_code_to_error};
-use crate::parsing::{ResticMessage, parse_restic_message};
-use log::warn;
 use pathsearch::find_executable_in_path;
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsString;
+use std::fmt::Display;
 use std::io;
 use std::process::{ExitStatus, Stdio};
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::Command;
 
 impl Restic {
-    pub(crate) async fn exec<I, S, F>(
+    pub(crate) async fn exec<F>(
         &self,
-        arguments: I,
+        arguments: impl IntoIterator<Item = String>,
         mut on_message: F,
     ) -> Result<(), ResticError>
     where
-        I: IntoIterator<Item = S>,
-        S: AsRef<OsStr>,
-        F: FnMut(ResticMessage),
+        F: FnMut(String, MessageOutputType),
     {
         let start = async || -> Result<ExitStatus, io::Error> {
             let binary_path = Self::get_binary_path()?;
@@ -46,10 +43,7 @@ impl Restic {
                                 stdout_complete = true;
                                 continue;
                             }
-                            Some(line) => match parse_restic_message(&line) {
-                                Ok(msg) => on_message(msg),
-                                Err(e) => warn!("Ignored failure to parse stdout message: {:?}", e),
-                            },
+                            Some(line) => on_message(line, MessageOutputType::Stdout),
                         }
                     },
                     stderr_lines = stderr_lines.next_line(), if !stderr_complete => {
@@ -58,10 +52,7 @@ impl Restic {
                                 stderr_complete = true;
                                 continue;
                             }
-                            Some(line) => match parse_restic_message(&line) {
-                                Ok(msg) => on_message(msg),
-                                Err(e) => warn!("Ignored failure to parse stderr message: {:?}", e),
-                            },
+                            Some(line) => on_message(line, MessageOutputType::Stderr),
                         }
                     },
                     else => {
@@ -74,10 +65,7 @@ impl Restic {
             Ok(status)
         };
 
-        let status = start()
-            .await
-            .map_err(|io_error| ResticError::FailedToExecute(io_error))?;
-
+        let status = start().await.map_err(ResticError::FailedToExecute)?;
         let code = status.code().ok_or(ResticError::Killed)?;
 
         match map_exit_code_to_error(code) {
@@ -94,5 +82,20 @@ impl Restic {
             ));
         };
         Ok(exe.into_os_string())
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MessageOutputType {
+    Stdout,
+    Stderr,
+}
+
+impl Display for MessageOutputType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            MessageOutputType::Stdout => write!(f, "stdout"),
+            MessageOutputType::Stderr => write!(f, "stderr"),
+        }
     }
 }

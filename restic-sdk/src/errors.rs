@@ -13,8 +13,10 @@ pub enum ResticError {
     GenericError,
     #[error("restic exit(2): Go runtime error")]
     GoRuntimeError,
-    #[error("restic exit(10): Repository does not exist")]
+    #[error("restic exit(3): Backup command could not read some source data")]
     BackupFailedToReadSomeSourceData,
+    #[error("restic exit(10): Repository does not exist")]
+    RepositoryDoesNotExist,
     #[error("restic exit(11): Failed to lock repository")]
     FailedToLockRepository,
     #[error("restic exit(12): Wrong password")]
@@ -35,7 +37,8 @@ pub(crate) fn map_exit_code_to_error(code: i32) -> Result<(), ResticError> {
         0 => Ok(()),
         1 => Err(ResticError::GenericError),
         2 => Err(ResticError::GoRuntimeError),
-        10 => Err(ResticError::BackupFailedToReadSomeSourceData),
+        3 => Err(ResticError::BackupFailedToReadSomeSourceData),
+        10 => Err(ResticError::RepositoryDoesNotExist),
         11 => Err(ResticError::FailedToLockRepository),
         12 => Err(ResticError::WrongPassword),
         130 => Err(ResticError::Interrupted),

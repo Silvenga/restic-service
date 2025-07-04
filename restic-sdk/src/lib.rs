@@ -1,10 +1,15 @@
+mod builder;
 mod client;
-pub mod commands;
+mod commands;
 mod config;
-mod errors;
-mod parsing;
 mod extensions;
 
-pub use client::Restic;
-pub use config::ResticConfig;
-pub use errors::*;
+mod parsing;
+
+pub mod errors;
+pub mod messages;
+
+pub use builder::*;
+pub use client::*;
+pub use commands::*;
+pub use config::*;

@@ -1,4 +1,4 @@
-use crate::ResticError;
+use crate::errors::ResticError;
 
 pub trait IntoResticError<TOk, TErr> {
     fn or_restic_processing_error(self) -> Result<TOk, ResticError>;
