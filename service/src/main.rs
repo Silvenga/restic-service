@@ -58,7 +58,7 @@ fn main_cli() -> ExitCode {
     match service_result {
         Ok(_) => ExitCode::SUCCESS,
         Err(e) => {
-            eprintln!("Error: {}", e);
+            eprintln!("Error: {e}");
             ExitCode::FAILURE
         }
     }
