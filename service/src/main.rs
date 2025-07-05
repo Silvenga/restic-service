@@ -1,6 +1,7 @@
 mod cli;
 mod host;
 mod management;
+mod config;
 
 #[macro_use]
 extern crate windows_service;

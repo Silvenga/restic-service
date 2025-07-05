@@ -2,18 +2,18 @@ use crate::errors::ResticError;
 use crate::extensions::errors::IntoResticError;
 use crate::extensions::vec::VecHelpers;
 use crate::messages::{Initialized, ResticInitMessage};
-use crate::{CommandBuilder, Restic};
+use crate::{ArgumentsBuilder, Restic};
 
 impl Restic {
     /// Initializes a new Restic repository using the current config.
     pub async fn init(&self) -> Result<Initialized, ResticError> {
         let mut messages = Vec::new();
-
-        let arguments = CommandBuilder::new().with_verb("init").build();
-
-        self.exec_json(arguments, |message: ResticInitMessage| {
-            messages.push(message);
-        })
+        self.exec_json(
+            ArgumentsBuilder::new().with_verb("init"),
+            |message: ResticInitMessage| {
+                messages.push(message);
+            },
+        )
         .await?;
 
         let message = messages.into_single().or_restic_processing_error()?;

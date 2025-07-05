@@ -1,6 +1,6 @@
-use crate::Restic;
 use crate::errors::{ResticError, map_exit_code_to_error};
 use crate::parsing::ResticMessage;
+use crate::{ArgumentsBuilder, Restic};
 use log::warn;
 use pathsearch::find_executable_in_path;
 use std::ffi::OsString;
@@ -14,7 +14,7 @@ impl Restic {
     /// Low-level command execution method that allows for custom handling of output messages.
     pub(crate) async fn exec<F>(
         &self,
-        arguments: impl IntoIterator<Item = String>,
+        arguments: ArgumentsBuilder,
         mut on_message: F,
     ) -> Result<(), ResticError>
     where
@@ -23,7 +23,7 @@ impl Restic {
         let start = async || -> Result<ExitStatus, io::Error> {
             let binary_path = Self::get_binary_path()?;
             let mut process = Command::new(binary_path)
-                .args(arguments)
+                .args(arguments.build())
                 .stdin(Stdio::null())
                 .stdout(Stdio::piped())
                 .stderr(Stdio::piped())
@@ -90,7 +90,7 @@ impl Restic {
     /// Low-level command execution method to invoke Restic with JSON handling.
     pub(crate) async fn exec_json<P, F>(
         &self,
-        arguments: impl IntoIterator<Item = String>,
+        arguments: ArgumentsBuilder,
         mut on_message: F,
     ) -> Result<(), ResticError>
     where
@@ -98,7 +98,7 @@ impl Restic {
         F: FnMut(P),
     {
         self.exec(
-            arguments.into_iter().chain(vec!["--json".to_owned()]),
+            arguments.with_flag("json"),
             |string, output_type| match P::parse_message(&string) {
                 Ok(message) => on_message(message),
                 Err(err) => {
