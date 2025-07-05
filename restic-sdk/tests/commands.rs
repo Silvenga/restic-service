@@ -5,6 +5,12 @@ use std::fs::{create_dir, create_dir_all, remove_dir_all, write};
 use std::path::{Path, PathBuf};
 use uuid::Uuid;
 
+#[cfg(test)]
+#[ctor::ctor]
+fn init() {
+    colog::init();
+}
+
 #[tokio::test]
 async fn command_version() {
     let repository = VirtualRepository::new();
@@ -87,8 +93,6 @@ struct VirtualRepository {
 
 impl VirtualRepository {
     pub fn new() -> Self {
-        colog::init();
-
         let id: String = Uuid::new_v4().into();
         let root_path = Path::join(&temp_dir(), "restic-sdk-test-repo").join(id);
         let repository_path = root_path.join("repo");

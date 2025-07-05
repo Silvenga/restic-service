@@ -5,7 +5,6 @@ mod client;
 mod commands;
 mod config;
 mod extensions;
-
 mod parsing;
 
 pub mod errors;
