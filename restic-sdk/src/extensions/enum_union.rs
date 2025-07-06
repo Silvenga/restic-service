@@ -27,6 +27,7 @@ macro_rules! enum_union {
                 }
             }
 
+            #[allow(unreachable_patterns)]
             #[automatically_derived]
             impl TryFrom<$enum_name> for $variant_name {
                 // Just using a string because macro's have no method of concatenating idents outside of nightly.

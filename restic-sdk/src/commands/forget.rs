@@ -1,5 +1,4 @@
 use crate::errors::ResticError;
-use crate::messages::ResticBackupMessage;
 use crate::{ArgumentsBuilder, BuilderValue, Restic};
 use log::debug;
 
