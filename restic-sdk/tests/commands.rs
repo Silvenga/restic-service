@@ -1,8 +1,10 @@
+use restic_sdk::backup::BackupOptions;
 use restic_sdk::forget::ForgetOptions;
 use restic_sdk::{Restic, ResticConfig};
 use std::env::temp_dir;
 use std::fs::{create_dir, create_dir_all, remove_dir_all, write};
 use std::path::{Path, PathBuf};
+use tokio_util::sync::CancellationToken;
 use uuid::Uuid;
 
 #[cfg(test)]
@@ -16,7 +18,7 @@ async fn command_version() {
     let repository = VirtualRepository::new();
 
     let restic = repository.get_client();
-    let result = restic.version().await;
+    let result = restic.version(&CancellationToken::new()).await;
 
     _ = result.unwrap();
 }
@@ -26,7 +28,7 @@ async fn command_can_open_missing() {
     let repository = VirtualRepository::new();
 
     let restic = repository.get_client();
-    let result = restic.can_open().await.unwrap();
+    let result = restic.can_open(&CancellationToken::new()).await.unwrap();
 
     assert!(!result)
 }
@@ -36,9 +38,9 @@ async fn command_can_open_existing() {
     let repository = VirtualRepository::new();
 
     let restic = repository.get_client();
-    restic.init().await.unwrap();
+    restic.init(&CancellationToken::new()).await.unwrap();
 
-    let result = restic.can_open().await.unwrap();
+    let result = restic.can_open(&CancellationToken::new()).await.unwrap();
 
     assert!(result)
 }
@@ -48,9 +50,12 @@ async fn command_init_if_not_exists() {
     let repository = VirtualRepository::new();
 
     let restic = repository.get_client();
-    restic.init_if_not_exists().await.unwrap();
+    restic
+        .init_if_not_exists(&CancellationToken::new())
+        .await
+        .unwrap();
 
-    let result = restic.can_open().await.unwrap();
+    let result = restic.can_open(&CancellationToken::new()).await.unwrap();
 
     assert!(result)
 }
@@ -60,10 +65,14 @@ async fn command_backup() {
     let repository = VirtualRepository::new();
 
     let restic = repository.get_client();
-    restic.init().await.unwrap();
+    restic.init(&CancellationToken::new()).await.unwrap();
 
     let summary = restic
-        .backup(vec![repository.get_random_data_path().as_str()])
+        .backup(
+            vec![repository.get_random_data_path().as_str()],
+            BackupOptions::new(),
+            &CancellationToken::new(),
+        )
         .await;
 
     assert!(summary.unwrap().snapshot_id.is_some());
@@ -74,15 +83,30 @@ async fn command_forget() {
     let repository = VirtualRepository::new();
 
     let restic = repository.get_client();
-    restic.init().await.unwrap();
+    restic.init(&CancellationToken::new()).await.unwrap();
 
     let random_data_path = repository.get_random_data_path();
 
-    _ = restic.backup(vec![random_data_path.as_str()]).await;
-    _ = restic.backup(vec![random_data_path.as_str()]).await;
+    _ = restic
+        .backup(
+            vec![random_data_path.as_str()],
+            BackupOptions::new(),
+            &CancellationToken::new(),
+        )
+        .await;
+    _ = restic
+        .backup(
+            vec![random_data_path.as_str()],
+            BackupOptions::new(),
+            &CancellationToken::new(),
+        )
+        .await;
 
     _ = restic
-        .forget(ForgetOptions::new().keep_last(0).unsafe_allow_remove_all())
+        .forget(
+            ForgetOptions::new().keep_last(0).unsafe_allow_remove_all(),
+            &CancellationToken::new(),
+        )
         .await;
 }
 

@@ -1,7 +1,7 @@
 use crate::errors::{ResticError, map_exit_code_to_error};
 use crate::parsing::ResticMessage;
 use crate::{ArgumentsBuilder, Restic};
-use log::warn;
+use log::{debug, warn};
 use pathsearch::find_executable_in_path;
 use std::ffi::OsString;
 use std::fmt::Display;
@@ -9,6 +9,7 @@ use std::io;
 use std::process::{ExitStatus, Stdio};
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::Command;
+use tokio_util::sync::CancellationToken;
 
 impl Restic {
     /// Low-level command execution method that allows for custom handling of output messages.
@@ -16,6 +17,7 @@ impl Restic {
         &self,
         arguments: ArgumentsBuilder,
         mut on_message: F,
+        cancellation_token: &CancellationToken,
     ) -> Result<(), ResticError>
     where
         F: FnMut(String, MessageOutputType),
@@ -58,6 +60,11 @@ impl Restic {
                             Some(line) => on_message(line, MessageOutputType::Stderr),
                         }
                     },
+                    _ = cancellation_token.cancelled(), if !stderr_complete && !stdout_complete => {
+                        debug!("Cancellation token triggered, killing process.");
+                        process.start_kill()?;
+                        break;
+                    },
                     else => {
                         break;
                     }
@@ -92,6 +99,7 @@ impl Restic {
         &self,
         arguments: ArgumentsBuilder,
         mut on_message: F,
+        cancellation_token: &CancellationToken,
     ) -> Result<(), ResticError>
     where
         P: ResticMessage,
@@ -99,12 +107,22 @@ impl Restic {
     {
         self.exec(
             arguments.with_flag("json"),
-            |string, output_type| match P::parse_message(&string) {
-                Ok(message) => on_message(message),
-                Err(err) => {
-                    warn!("Failed to parse {output_type} message '{string}' due to '{err}'")
+            |line, output_type| {
+                if line.is_empty() {
+                    return;
+                }
+                if line.starts_with("{") {
+                    match P::parse_message(&line) {
+                        Ok(message) => on_message(message),
+                        Err(err) => {
+                            warn!("Failed to parse {output_type} message '{line}' due to '{err}'")
+                        }
+                    }
+                } else {
+                    debug!("Ignored non-JSON {output_type} message: '{line}'");
                 }
             },
+            cancellation_token,
         )
         .await
     }

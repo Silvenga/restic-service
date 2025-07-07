@@ -1,14 +1,20 @@
 use crate::errors::ResticError;
 use crate::{ArgumentsBuilder, BuilderValue, Restic};
 use log::debug;
+use tokio_util::sync::CancellationToken;
 
 impl Restic {
-    pub async fn forget(&self, options: ForgetOptions) -> Result<(), ResticError> {
+    pub async fn forget(
+        &self,
+        options: ForgetOptions,
+        cancellation_token: &CancellationToken,
+    ) -> Result<(), ResticError> {
         self.exec(
             options.builder.with_verb("forget"),
             |string, output_type| {
                 debug!("Restic {output_type:?}: {string}");
             },
+            cancellation_token,
         )
         .await?;
         Ok(())

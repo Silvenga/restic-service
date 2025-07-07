@@ -1,7 +1,8 @@
 use crate::config::ServiceConfiguration;
 use crate::config::parser::parse_configuration;
 use log::debug;
-use std::io;
+use std::path::{Path, PathBuf};
+use std::{env, io};
 use thiserror::Error;
 use tokio::fs::{canonicalize, read_to_string, try_exists};
 
@@ -21,15 +22,32 @@ impl ServiceConfigurationManager {
     }
 
     pub async fn locate_configuration_file(&self) -> Result<String, ConfigurationError> {
-        let paths_to_probe = ["service_config.toml"];
-        for path in &paths_to_probe {
-            if try_exists(path).await? {
-                let full_path = canonicalize(path).await?.to_str().unwrap().to_owned();
+        for path in self.get_config_paths().into_iter() {
+            if try_exists(&path).await? {
+                let full_path = canonicalize(&path).await?.to_str().unwrap().to_owned();
                 debug!("Using configuration file found at '{full_path}'.");
                 return Ok(full_path);
             }
+            debug!(
+                "No configuration found for '{}'.",
+                path.to_str().unwrap_or("<invalid path>")
+            );
         }
         Err(ConfigurationError::ConfigurationFileMissing)
+    }
+
+    fn get_config_paths(&self) -> impl IntoIterator<Item = PathBuf> {
+        let current_exe = &env::current_exe().expect("current_exe should return a valid path");
+        let exe_dir = current_exe
+            .parent()
+            .expect("current_exe should be in a directory");
+
+        let current_dir = &env::current_dir().expect("current_dir should return a valid path");
+
+        vec![
+            Path::join(exe_dir, "service_config.toml"),
+            Path::join(current_dir, "service_config.toml"),
+        ]
     }
 }
 

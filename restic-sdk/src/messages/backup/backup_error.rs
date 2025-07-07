@@ -4,11 +4,16 @@ use serde::Deserialize;
 #[derive(Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct BackupError {
     /// Error message
-    pub message: String,
+    pub error: Error,
     // What restic was trying to do
     pub during: String,
     /// Usually, the path of the problematic file
     pub item: String,
+}
+
+#[derive(Deserialize, Debug, Clone, Eq, PartialEq)]
+pub struct Error {
+    pub message: String,
 }
 
 #[cfg(test)]
@@ -21,14 +26,16 @@ mod tests {
     fn can_parse() {
         let json = r#"{
             "message_type": "error",
-            "message": "Failed to open file",
+            "error": {
+                "message": "Failed to open file"
+            },
             "during": "backup",
             "item": "/path/to/file.txt"
         }"#;
         let message = ResticBackupMessage::parse_message(json).expect("parse should succeed");
 
         let result = BackupError::try_from(message).expect("should convert");
-        assert_eq!(result.message, "Failed to open file");
+        assert_eq!(result.error.message, "Failed to open file");
         assert_eq!(result.during, "backup");
         assert_eq!(result.item, "/path/to/file.txt");
     }

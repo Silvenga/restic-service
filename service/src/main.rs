@@ -1,13 +1,13 @@
 #[macro_use]
 extern crate windows_service;
-mod cli;
-mod config;
-mod host;
-mod management;
-mod service;
+pub(crate) mod cli;
+pub(crate) mod config;
+pub(crate) mod host;
+pub(crate) mod management;
+pub(crate) mod service;
 
 use crate::cli::{Verb, parse_args};
-use crate::host::run::run;
+use crate::host::run::run_host;
 use crate::management::{
     SERVICE_NAME, install_service, restart_service, start_service, status_service, stop_service,
     uninstall_service,
@@ -30,6 +30,7 @@ define_windows_service!(ffi_service_main, main_service);
 #[cfg(windows)]
 fn main() -> ExitCode {
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
+    log_panics::init();
 
     match service_dispatcher::start(SERVICE_NAME, ffi_service_main) {
         // Likely running in CLI mode.
@@ -58,7 +59,22 @@ async fn main_cli() -> ExitCode {
         Verb::Status => status_service(),
         Verb::Run => {
             info!("Running service in CLI mode...");
-            let exit_code = run(env::args_os().collect(), CancellationToken::new()).await;
+
+            let cancellation_token = CancellationToken::new();
+
+            ctrlc::set_handler({
+                let cancellation_token = cancellation_token.clone();
+                move || {
+                    info!("Ctrl+C received, canceling jobs...");
+                    cancellation_token.cancel();
+                }
+            })
+            .expect("handler to be set");
+
+            let exit_code = run_host(env::args_os().collect(), &cancellation_token).await;
+
+            info!("Service exited with code {exit_code}.");
+
             return ExitCode::from(exit_code);
         }
     };
@@ -102,26 +118,19 @@ async fn main_service(arguments: Vec<OsString>) {
         }
     });
 
-    let run_service_task = tokio::spawn({
-        let cancellation_token = cancellation_token.clone();
-        async move {
-            info!("Service started, running jobs...");
+    info!("Service started, running jobs...");
 
-            status_handle
-                .set_status_running(ServiceControlAccept::STOP)
-                .expect("set service status should always succeed");
-
-            let exit_code = run(arguments, cancellation_token.clone()).await;
-            cancellation_token.cancel();
-
-            info!("Service will stop with exit code: {exit_code:?}");
-            exit_code
-        }
-    });
-
-    let (_, exit_code) = tokio::join!(cancellation_task, run_service_task);
     status_handle
-        .set_status_stopped(exit_code.unwrap_or(3) as u32)
+        .set_status_running(ServiceControlAccept::STOP)
+        .expect("set service status should always succeed");
+
+    let exit_code = run_host(arguments, &cancellation_token).await;
+    cancellation_token.cancel();
+
+    cancellation_task.await.unwrap();
+
+    status_handle
+        .set_status_stopped(exit_code as u32)
         .expect("set status_stopped should always succeed");
 }
 

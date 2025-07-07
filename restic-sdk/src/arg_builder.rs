@@ -44,8 +44,8 @@ impl ArgumentsBuilder {
         self
     }
 
-    pub fn with_values<'a>(mut self, value: impl IntoIterator<Item = &'a str>) -> Self {
-        self.values = value.into_iter().map(String::from).collect();
+    pub fn with_values(mut self, values: impl IntoIterator<Item = impl BuilderValue>) -> Self {
+        self.values = values.into_iter().map(|x| x.to_builder_value()).collect();
         self
     }
 

@@ -31,21 +31,17 @@ pub struct ResticJob {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct BackupOptions {
-    pub one_file_system: bool,
     pub use_fs_snapshot: bool,
     pub verbose: bool,
     pub exclude_caches: bool,
-    pub additional_flags: Vec<String>,
 }
 
 impl Default for BackupOptions {
     fn default() -> Self {
         BackupOptions {
-            one_file_system: true,
             use_fs_snapshot: true,
             verbose: false,
             exclude_caches: false,
-            additional_flags: Vec::default(),
         }
     }
 }
