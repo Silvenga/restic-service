@@ -2,17 +2,18 @@
 extern crate windows_service;
 pub(crate) mod cli;
 pub(crate) mod config;
-pub(crate) mod host;
+mod jobs;
 pub(crate) mod management;
 pub(crate) mod service;
+mod service_host;
 
 use crate::cli::{Verb, parse_args};
-use crate::host::run::run_host;
 use crate::management::{
     SERVICE_NAME, install_service, restart_service, start_service, status_service, stop_service,
     uninstall_service,
 };
 use crate::service::ServiceStatusHandlerExtension;
+use crate::service_host::ServiceHost;
 use env_logger::Env;
 use log::info;
 use std::env;
@@ -71,7 +72,7 @@ async fn main_cli() -> ExitCode {
             })
             .expect("handler to be set");
 
-            let exit_code = run_host(env::args_os().collect(), &cancellation_token).await;
+            let exit_code = ServiceHost::run(env::args_os().collect(), &cancellation_token).await;
 
             info!("Service exited with code {exit_code}.");
 
@@ -124,7 +125,7 @@ async fn main_service(arguments: Vec<OsString>) {
         .set_status_running(ServiceControlAccept::STOP)
         .expect("set service status should always succeed");
 
-    let exit_code = run_host(arguments, &cancellation_token).await;
+    let exit_code = ServiceHost::run(arguments, &cancellation_token).await;
     cancellation_token.cancel();
 
     cancellation_task.await.unwrap();
