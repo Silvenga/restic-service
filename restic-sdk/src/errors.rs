@@ -27,7 +27,7 @@ pub enum ResticError {
     UnexpectedExitCode(i32),
     // Handling errors (after successful results from restic).
     #[error(transparent)]
-    ErrorDuringProcessing(#[from] Box<dyn std::error::Error>),
+    ErrorDuringProcessing(#[from] Box<dyn std::error::Error + Send + Sync>),
     #[error("unexpected response from restic: {0}")]
     UnexpectedResponse(String),
 }

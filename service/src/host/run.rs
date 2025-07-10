@@ -5,6 +5,7 @@ use chrono::Local;
 use log::info;
 use std::ffi::OsString;
 use tokio::sync::mpsc::channel;
+use tokio::task;
 use tokio::time::Instant;
 use tokio_util::sync::CancellationToken;
 
@@ -28,16 +29,20 @@ async fn run_with_config(config: ServiceConfiguration, cancellation_token: &Canc
     let (sender, mut receiver) = channel::<(String, ResticJob)>(256);
     let (mut scheduler, sched_service) = Scheduler::<Local>::launch(tokio::time::sleep);
 
-    let cron_task = tokio::task::spawn(sched_service);
+    let cron_task = task::spawn(sched_service);
 
-    let jobs_task = tokio::task::spawn({
+    let jobs_task = task::spawn({
         let cancellation_token = cancellation_token.clone();
         async move {
             while !cancellation_token.is_cancelled() {
                 if let Some((job_name, job_config)) = receiver.recv().await {
                     info!("Job '{job_name}' is running.");
                     let start = Instant::now();
-                    JobRunner::new(job_config).run(&cancellation_token).await;
+
+                    let runner = JobRunner::new(job_config);
+
+                    runner.run(&cancellation_token).await;
+
                     info!(
                         "Job '{job_name}' is stopped after running for {:?}.",
                         start.elapsed()

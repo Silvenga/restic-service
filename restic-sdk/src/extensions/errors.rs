@@ -4,7 +4,7 @@ pub trait IntoResticError<TOk, TErr> {
     fn or_restic_processing_error(self) -> Result<TOk, ResticError>;
 }
 
-impl<TOk, TErr: std::error::Error + 'static> IntoResticError<TOk, TErr> for Result<TOk, TErr> {
+impl<TOk, TErr: std::error::Error + 'static + Sync + Send> IntoResticError<TOk, TErr> for Result<TOk, TErr> {
     fn or_restic_processing_error(self) -> Result<TOk, ResticError> {
         match self {
             Ok(ok) => Ok(ok),

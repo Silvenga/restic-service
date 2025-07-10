@@ -29,4 +29,4 @@ env_logger = "0.11.8"
 log-panics = { version = "2.1.0", features = ["with-backtrace"] }
 chrono = "0.4.41"
 ctrlc = { version = "3.4.7", features = ["termination"] }
-sysinfo = "0.35.2"
+sysinfo = { version = "0.35.2", default-features = false, features = ["disk"] }

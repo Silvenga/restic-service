@@ -2,6 +2,7 @@ use crate::config::ResticJob;
 use log::{info, warn};
 use restic_sdk::backup::BackupOptions;
 use restic_sdk::errors::ResticError;
+use restic_sdk::forget::ForgetOptions;
 use restic_sdk::{Restic, ResticConfig};
 use sysinfo::Disks;
 use tokio::fs::{canonicalize, try_exists};
@@ -21,11 +22,15 @@ impl JobRunner {
 
         let result = self.run_backup(&client, cancellation_token).await;
         if let Err(e) = result {
-            warn!("Backup job failed with error: {e:?}");
-            return;
+            warn!("Backup failed with error: {e:?}");
         }
 
-        //
+        if self.config.forget_and_purge.enabled {
+            let result = self.run_forget_and_prune(&client, cancellation_token).await;
+            if let Err(e) = result {
+                warn!("Forget and prune failed with error: {e:?}");
+            }
+        }
     }
 
     async fn run_backup(
@@ -33,14 +38,39 @@ impl JobRunner {
         client: &Restic,
         cancellation_token: &CancellationToken,
     ) -> Result<(), ResticError> {
+        if !client.can_open(cancellation_token).await? {
+            info!("Restic repository cannot be opened, assuming it does not exist.");
+            let result = client.init(cancellation_token).await?;
+            info!(
+                "Restic repository initialized successfully with id {:?}",
+                result.id
+            );
+        }
+
         let backup_options = self.get_backup_options();
         let sources = self.get_backup_sources().await;
 
         info!("Starting backup against {:?}...", sources.join(", "));
-        let result = client
+        let backup_result = client
             .backup(sources, backup_options, cancellation_token)
             .await?;
-        info!("Backup completed successfully with summary {result:?}");
+
+        info!("Backup completed successfully with summary {backup_result:?}");
+
+        Ok(())
+    }
+
+    async fn run_forget_and_prune(
+        &self,
+        client: &Restic,
+        cancellation_token: &CancellationToken,
+    ) -> Result<(), ResticError> {
+        info!("Starting forget and prune...");
+
+        let forget_options = self.get_forget_and_prune_options();
+        client.forget(forget_options, cancellation_token).await?;
+
+        info!("Prune completed successfully.");
 
         Ok(())
     }
@@ -111,5 +141,17 @@ impl JobRunner {
         }
 
         sources
+    }
+
+    fn get_forget_and_prune_options(&self) -> ForgetOptions {
+        let mut options = ForgetOptions::default();
+
+        options = options.prune();
+
+        for flag in &self.config.forget_and_purge.additional_flags {
+            options = options.with_flag(flag);
+        }
+
+        options
     }
 }

@@ -26,7 +26,7 @@ impl Restic {
                     debug!("Backup status: {message:?}");
                 }
                 ResticBackupMessage::BackupError(error) => {
-                    warn!("Error reported by restic during backup: {error:?}")
+                    debug!("Error reported by restic during backup: {error:?}")
                 }
                 ResticBackupMessage::ExitError(error) => {
                     warn!("Exit error reported by restic: {error:?}")
