@@ -1,13 +1,12 @@
 use serde::Deserialize;
 
 /// A backup status message from restic
-#[derive(Deserialize, Debug, Clone, PartialEq)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Default)]
+#[serde(default)]
 pub struct BackupStatus {
     /// Time since backup started
-    #[serde(default)]
     pub seconds_elapsed: u64,
     /// Estimated time remaining
-    #[serde(default)]
     pub seconds_remaining: u64,
     /// Fraction of data backed up (bytes_done/total_bytes)
     pub percent_done: f64,
@@ -20,10 +19,8 @@ pub struct BackupStatus {
     /// Number of bytes completed (backed up to repo)
     pub bytes_done: u64,
     /// Number of errors
-    #[serde(default)]
     pub error_count: u64,
     /// List of files currently being backed up
-    #[serde(default)]
     pub current_files: Vec<String>,
 }
 
@@ -77,5 +74,17 @@ mod tests {
         assert_eq!(result.seconds_elapsed, 0);
         assert_eq!(result.seconds_remaining, 0);
         assert_eq!(result.error_count, 0);
+    }
+
+    #[test]
+    fn can_parse_real() {
+        let json = r#"{"message_type":"status","seconds_elapsed":11,"percent_done":0,"total_files":9,"total_bytes":101013}"#;
+        let message = ResticBackupMessage::parse_message(json).expect("parse should succeed");
+
+        let result = BackupStatus::try_from(message).expect("should convert");
+        assert_eq!(result.seconds_elapsed, 11);
+        assert_eq!(result.percent_done, 0.0);
+        assert_eq!(result.total_files, 9);
+        assert_eq!(result.total_bytes, 101013);
     }
 }
