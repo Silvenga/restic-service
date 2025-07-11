@@ -1,0 +1,49 @@
+name: Build
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+permissions:
+  actions: read
+  contents: write
+  pull-requests: write
+
+jobs:
+  check-rust:
+    name: Build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Test
+        run: cargo test --no-fail-fast
+
+      - uses: cargo-bins/cargo-binstall@main
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+      - name: Install WiX
+        run: |
+          dotnet tool install --global wix
+
+          # Swatinem/rust-cache via actions-rust-lang/setup-rust-toolchain is not compatible with binstall.
+          # https://github.com/Swatinem/rust-cache/issues/204
+          # binstall fails to restore the bin if the crate was already cached.
+          cargo binstall --force cargo-wix
+
+      - name: Build Installer
+        shell: pwsh
+        run: |
+          cd ./service/
+          cargo wix --verbose --package service --output restic-service-installer.msi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: publish
+          path: |
+            service/restic-service-installer.msi
+            target/release/restic-service.exe
