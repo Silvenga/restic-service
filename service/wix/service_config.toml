@@ -1,0 +1,21 @@
+# See https://github.com/Silvenga/restic-service/blob/master/docs/service_config.toml
+version = 1
+
+#[jobs.example_job]
+## At 4am
+#cron = "0 4 * * *"
+#repository = "rest:https://example.com/"
+#password = "password"
+#
+#[jobs.example_job.backup]
+#exclude_caches = true
+#source_fixed_drives = true
+#
+#[jobs.example_job.forget_and_purge]
+#enable = true
+#keep_last = 3
+#keep_daily = 7
+#keep_weekly = 4
+#
+#[jobs.example_job.environment]
+#RESTIC_READ_CONCURRENCY = "8"

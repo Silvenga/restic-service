@@ -1,4 +1,4 @@
-pub const SERVICE_NAME: &str = "Slvn.Restic.Service";
+pub const SERVICE_NAME: &str = "Silvenga.ResticService";
 
 pub fn install_service() -> Result<(), windows_service::Error> {
     todo!()
