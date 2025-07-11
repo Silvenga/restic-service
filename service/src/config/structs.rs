@@ -32,6 +32,10 @@ pub struct BackupJobConfiguration {
     pub exclude_caches: bool,
     pub source_fixed_drives: bool,
     pub sources: Vec<String>,
+    pub cleanup_cache: bool,
+    #[cfg(not(windows))]
+    pub one_file_system: bool,
+    pub additional_flags: Vec<String>,
 }
 
 impl Default for BackupJobConfiguration {
@@ -42,6 +46,10 @@ impl Default for BackupJobConfiguration {
             exclude_caches: false,
             source_fixed_drives: false,
             sources: Vec::default(),
+            cleanup_cache: false,
+            #[cfg(not(windows))]
+            one_file_system: false,
+            additional_flags: Vec::default(),
         }
     }
 }
@@ -51,4 +59,39 @@ impl Default for BackupJobConfiguration {
 pub struct ForgetConfiguration {
     pub enabled: bool,
     pub additional_flags: Vec<String>,
+
+    // Retention policy options
+    pub group_by: Option<String>,
+    pub keep_last: Option<u32>,
+    pub keep_hourly: Option<u32>,
+    pub keep_daily: Option<u32>,
+    pub keep_weekly: Option<u32>,
+    pub keep_monthly: Option<u32>,
+    pub keep_yearly: Option<u32>,
+    pub keep_within: Option<String>,
+    pub keep_within_hourly: Option<String>,
+    pub keep_within_daily: Option<String>,
+    pub keep_within_weekly: Option<String>,
+    pub keep_within_monthly: Option<String>,
+    pub keep_within_yearly: Option<String>,
+    pub keep_tag: Option<String>,
+
+    // Filtering options
+    pub host: Option<String>,
+    pub tag: Option<String>,
+    pub path: Option<String>,
+
+    // Behavior options
+    pub unsafe_allow_remove_all: bool,
+    pub compact: bool,
+    pub dry_run: bool,
+    pub prune: bool,
+
+    // Prune-specific options
+    pub max_unused: Option<String>,
+    pub max_repack_size: Option<String>,
+    pub repack_cacheable_only: bool,
+    pub repack_small: bool,
+    pub repack_uncompressed: bool,
+    pub repack_smaller_than: Option<String>,
 }

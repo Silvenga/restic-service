@@ -34,6 +34,20 @@ impl BackupJob {
             options = options.use_fs_snapshot();
         }
 
+        if self.config.cleanup_cache {
+            options = options.with_cleanup_cache();
+        }
+
+        #[cfg(not(windows))]
+        if self.config.one_file_system {
+            options = options.with_one_file_system();
+        }
+
+        // Additional flags for any custom options not covered above
+        for flag in &self.config.additional_flags {
+            options = options.with_flag(flag);
+        }
+
         options
     }
 
