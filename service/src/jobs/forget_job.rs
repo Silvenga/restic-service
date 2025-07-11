@@ -46,19 +46,19 @@ impl ForgetJob {
             options = options.keep_within(keep_within);
         }
         if let Some(keep_within_hourly) = &self.config.keep_within_hourly {
-            options = options.keep_within_hourly(keep_within_hourly);
+            options = options.keep_within_hourly(*keep_within_hourly);
         }
         if let Some(keep_within_daily) = &self.config.keep_within_daily {
-            options = options.keep_within_daily(keep_within_daily);
+            options = options.keep_within_daily(*keep_within_daily);
         }
         if let Some(keep_within_weekly) = &self.config.keep_within_weekly {
-            options = options.keep_within_weekly(keep_within_weekly);
+            options = options.keep_within_weekly(*keep_within_weekly);
         }
         if let Some(keep_within_monthly) = &self.config.keep_within_monthly {
-            options = options.keep_within_monthly(keep_within_monthly);
+            options = options.keep_within_monthly(*keep_within_monthly);
         }
         if let Some(keep_within_yearly) = &self.config.keep_within_yearly {
-            options = options.keep_within_yearly(keep_within_yearly);
+            options = options.keep_within_yearly(*keep_within_yearly);
         }
         if let Some(keep_tag) = &self.config.keep_tag {
             options = options.keep_tag(keep_tag);

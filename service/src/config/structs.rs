@@ -69,11 +69,11 @@ pub struct ForgetConfiguration {
     pub keep_monthly: Option<u32>,
     pub keep_yearly: Option<u32>,
     pub keep_within: Option<String>,
-    pub keep_within_hourly: Option<String>,
-    pub keep_within_daily: Option<String>,
-    pub keep_within_weekly: Option<String>,
-    pub keep_within_monthly: Option<String>,
-    pub keep_within_yearly: Option<String>,
+    pub keep_within_hourly: Option<u32>,
+    pub keep_within_daily: Option<u32>,
+    pub keep_within_weekly: Option<u32>,
+    pub keep_within_monthly: Option<u32>,
+    pub keep_within_yearly: Option<u32>,
     pub keep_tag: Option<String>,
 
     // Filtering options

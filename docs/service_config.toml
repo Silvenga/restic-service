@@ -21,9 +21,10 @@ version = 1
 cron = "0 2 * * *"
 
 # Restic repository location (required)
+# See https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html
 # Type: string
 # Can be local path, SFTP, S3, etc.
-repository = "/path/to/backup/repository"
+repository = "s3:s3.amazonaws.com/my-backup-bucket"
 
 # Repository password (required)
 # Type: string
@@ -34,7 +35,6 @@ password = "your-repository-password"
 # Type: object/map of string key-value pairs
 # Default: empty
 [jobs.daily-backup.environment]
-RESTIC_CACHE_DIR = "/tmp/restic-cache"
 AWS_ACCESS_KEY_ID = "your-aws-key"
 AWS_SECRET_ACCESS_KEY = "your-aws-secret"
 
@@ -83,7 +83,7 @@ cleanup_cache = false
 # Additional command-line flags to pass to restic backup (optional)
 # Type: array of strings
 # Default: empty array
-additional_flags = ["--exclude-file=/path/to/exclude-list.txt"]
+additional_flags = ["--exclude-file=C:\\exclude-list.txt"]
 
 # Forget and prune configuration (optional)
 # Controls automatic cleanup of old backups
@@ -147,27 +147,27 @@ keep_within = "30d"
 # Keep hourly snapshots within duration (optional)
 # Type: string or null
 # Default: null
-keep_within_hourly = "1d"
+keep_within_hourly = 1
 
 # Keep daily snapshots within duration (optional)
 # Type: string or null
 # Default: null
-keep_within_daily = "1w"
+keep_within_daily = 1
 
 # Keep weekly snapshots within duration (optional)
 # Type: string or null
 # Default: null
-keep_within_weekly = "1m"
+keep_within_weekly = 1
 
 # Keep monthly snapshots within duration (optional)
 # Type: string or null
 # Default: null
-keep_within_monthly = "1y"
+keep_within_monthly = 1
 
 # Keep yearly snapshots within duration (optional)
 # Type: string or null
 # Default: null
-keep_within_yearly = "10y"
+keep_within_yearly = 10
 
 # Keep snapshots with specific tag (optional)
 # Type: string or null
@@ -189,7 +189,7 @@ tag = "daily"
 # Only consider snapshots with specific path (optional)
 # Type: string or null
 # Default: null
-path = "/home"
+path = ""
 
 # Behavior options (all optional)
 

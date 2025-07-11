@@ -89,27 +89,27 @@ impl ForgetOptions {
     }
 
     /// Sets the `--keep-within-hourly` flag.
-    pub fn keep_within_hourly(self, value: &str) -> Self {
+    pub fn keep_within_hourly(self, value: u32) -> Self {
         self.with_flag_and_value("keep-within-hourly", value)
     }
 
     /// Sets the `--keep-within-daily` flag.
-    pub fn keep_within_daily(self, value: &str) -> Self {
+    pub fn keep_within_daily(self, value: u32) -> Self {
         self.with_flag_and_value("keep-within-daily", value)
     }
 
     /// Sets the `--keep-within-weekly` flag.
-    pub fn keep_within_weekly(self, value: &str) -> Self {
+    pub fn keep_within_weekly(self, value: u32) -> Self {
         self.with_flag_and_value("keep-within-weekly", value)
     }
 
     /// Sets the `--keep-within-monthly` flag.
-    pub fn keep_within_monthly(self, value: &str) -> Self {
+    pub fn keep_within_monthly(self, value: u32) -> Self {
         self.with_flag_and_value("keep-within-monthly", value)
     }
 
     /// Sets the `--keep-within-yearly` flag.
-    pub fn keep_within_yearly(self, value: &str) -> Self {
+    pub fn keep_within_yearly(self, value: u32) -> Self {
         self.with_flag_and_value("keep-within-yearly", value)
     }
 
