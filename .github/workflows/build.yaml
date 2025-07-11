@@ -13,12 +13,17 @@ permissions:
 jobs:
   check-rust:
     name: Build
-    runs-on: windows-latest
+    runs-on: windows-2025
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
+      - name: Install Restic
+        shell: pwsh
+        run: |
+          winget install --exact --id restic.restic --scope Machine --accept-source-agreements --accept-source-agreements
+          "C:\Program Files\WinGet\Links\" >> $env:GITHUB_PATH
 
       - name: Test
         run: cargo test --no-fail-fast
