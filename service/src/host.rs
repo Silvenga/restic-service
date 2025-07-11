@@ -2,7 +2,7 @@ use crate::config::{ResticJob, ServiceConfiguration, ServiceConfigurationManager
 use crate::jobs::JobRunner;
 use async_cron_scheduler::{Job, Scheduler};
 use chrono::Local;
-use log::info;
+use log::{info, warn};
 use std::ffi::OsString;
 use tokio::sync::mpsc::channel;
 use tokio::task;
@@ -22,8 +22,13 @@ impl ServiceHost {
             let configuration_cancellation_token = &cancellation_token.child_token();
             watcher.register_cancellation_token(configuration_cancellation_token);
 
-            let config = watcher.read_configuration().await.unwrap();
-            Self::run_with_config(config, configuration_cancellation_token).await;
+            match watcher.read_configuration().await {
+                Ok(config) => Self::run_with_config(config, configuration_cancellation_token).await,
+                Err(e) => {
+                    warn!("Configuration error, waiting for next update... Error: {e:?}");
+                    configuration_cancellation_token.cancelled().await;
+                }
+            };
         }
         0
     }

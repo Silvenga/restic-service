@@ -2,19 +2,23 @@
 extern crate windows_service;
 pub(crate) mod cli;
 pub(crate) mod config;
+mod host;
 mod jobs;
 pub(crate) mod management;
+pub(crate) mod paths;
 pub(crate) mod service;
-mod host;
 
 use crate::cli::{Verb, parse_args};
+use crate::host::ServiceHost;
 use crate::management::{
     SERVICE_NAME, install_service, restart_service, start_service, status_service, stop_service,
     uninstall_service,
 };
+use crate::paths::get_exe_directory;
 use crate::service::ServiceStatusHandlerExtension;
-use crate::host::ServiceHost;
-use env_logger::Env;
+use flexi_logger::{
+    AdaptiveFormat, Cleanup, Criterion, FileSpec, Logger, Naming, WriteMode, detailed_format,
+};
 use log::info;
 use std::env;
 use std::ffi::OsString;
@@ -30,7 +34,6 @@ define_windows_service!(ffi_service_main, main_service);
 
 #[cfg(windows)]
 fn main() -> ExitCode {
-    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
     log_panics::init();
 
     match service_dispatcher::start(SERVICE_NAME, ffi_service_main) {
@@ -49,6 +52,16 @@ fn main() -> ExitCode {
 
 #[tokio::main]
 async fn main_cli() -> ExitCode {
+    let _logger = Logger::try_with_env_or_str("info")
+        .unwrap()
+        .log_to_stdout()
+        .use_windows_line_ending()
+        .write_mode(WriteMode::BufferAndFlush)
+        .append()
+        .adaptive_format_for_stdout(AdaptiveFormat::Detailed)
+        .start()
+        .unwrap();
+
     let args = parse_args();
 
     let service_result = match args.verb {
@@ -91,6 +104,26 @@ async fn main_cli() -> ExitCode {
 
 #[tokio::main]
 async fn main_service(arguments: Vec<OsString>) {
+    let _logger = Logger::try_with_env_or_str("info")
+        .unwrap()
+        .log_to_file(
+            FileSpec::default()
+                .basename("restic-service")
+                .directory(get_exe_directory())
+                .suppress_timestamp(),
+        )
+        .use_windows_line_ending()
+        .write_mode(WriteMode::BufferAndFlush)
+        .append()
+        .rotate(
+            Criterion::Size(10 * 1024 * 1024),
+            Naming::NumbersDirect,
+            Cleanup::KeepLogFiles(3),
+        )
+        .format_for_files(detailed_format)
+        .start()
+        .unwrap();
+
     // Service Pre-Start, not under SCM control.
     let cancellation_token = CancellationToken::new();
     let status_handle = service_control_handler::register(SERVICE_NAME, {

@@ -87,39 +87,27 @@
                               Source='wix\service_config.toml'
                               KeyPath='yes'/>
                     </Component>
-
-
-                    <Directory Id='Bin' Name='bin'>
-                        <Component Id='Path' Guid='30BB6E51-B565-4567-9B7F-F2A15BFFD1B2' KeyPath='yes'>
-                            <Environment Id='PATH'
-                                         Name='PATH'
-                                         Value='[Bin]'
-                                         Permanent='no'
-                                         Part='last'
-                                         Action='set'
-                                         System='yes'/>
-                        </Component>
-                        <Component Id='binary0' Guid='*'>
-                            <File Id='exe0'
-                                  Name='restic-service.exe'
-                                  DiskId='1'
-                                  Source='$(var.CargoTargetBinDir)\restic-service.exe'
-                                  KeyPath='yes'/>
-                            <ServiceInstall Id="ServiceInstaller"
-                                            Type="ownProcess"
-                                            Name="Silvenga.ResticService"
-                                            DisplayName="Restic Service"
-                                            Description="A simple service for Windows that hosts and executes restic backup/forget runs."
-                                            Start="auto"
-                                            ErrorControl="normal"/>
-                            <ServiceControl Id="StartService"
-                                            Start="install"
-                                            Stop="both"
-                                            Remove="uninstall"
-                                            Name="Silvenga.ResticService"
-                                            Wait="yes"/>
-                        </Component>
-                    </Directory>
+                    <Component Id='Service' Guid='*'>
+                        <File Id='Bin'
+                              Name='restic-service.exe'
+                              DiskId='1'
+                              Source='$(var.CargoTargetBinDir)\restic-service.exe'
+                              KeyPath='yes'/>
+                        <ServiceInstall Id="ServiceInstaller"
+                                        Type="ownProcess"
+                                        Name="Silvenga.ResticService"
+                                        DisplayName="Restic Service"
+                                        Description="A simple service for Windows that hosts and executes restic backup/forget runs."
+                                        Start="auto"
+                                        ErrorControl="normal"
+                                        Account="LocalSystem"/>
+                        <ServiceControl Id="StartService"
+                                        Start="install"
+                                        Stop="both"
+                                        Remove="uninstall"
+                                        Name="Silvenga.ResticService"
+                                        Wait="yes"/>
+                    </Component>
                 </Directory>
             </Directory>
         </Directory>
@@ -127,8 +115,7 @@
         <Feature Id='Binaries' ConfigurableDirectory='APPLICATIONFOLDER'>
             <ComponentRef Id='License'/>
             <ComponentRef Id='DefaultConfig'/>
-            <ComponentRef Id='binary0'/>
-            <ComponentRef Id='Path'/>
+            <ComponentRef Id='Service'/>
         </Feature>
 
         <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONFOLDER"/>
