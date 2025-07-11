@@ -22,7 +22,7 @@ the [restic documentation](https://restic.readthedocs.io/en/latest/020_installat
 
 ## Configuration
 
-Configure the service by editing `C:\Program Files\service_config.toml` (use elevation). Changes will automatically be
+Configure the service by editing `C:\Program Files\Restic Service\service_config.toml` (use elevation). Changes will automatically be
 picked up by the service (running jobs will be gracefully stopped).
 
 An example configuration file is in [`./docs/service_config.toml`](./docs/service_config.toml).
