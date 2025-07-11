@@ -5,7 +5,7 @@ pub(crate) mod config;
 mod jobs;
 pub(crate) mod management;
 pub(crate) mod service;
-mod service_host;
+mod host;
 
 use crate::cli::{Verb, parse_args};
 use crate::management::{
@@ -13,7 +13,7 @@ use crate::management::{
     uninstall_service,
 };
 use crate::service::ServiceStatusHandlerExtension;
-use crate::service_host::ServiceHost;
+use crate::host::ServiceHost;
 use env_logger::Env;
 use log::info;
 use std::env;

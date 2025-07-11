@@ -1,27 +1,29 @@
-use std::ffi::OsString;
+use crate::config::{ResticJob, ServiceConfiguration, ServiceConfigurationManager};
+use crate::jobs::JobRunner;
 use async_cron_scheduler::{Job, Scheduler};
 use chrono::Local;
 use log::info;
+use std::ffi::OsString;
 use tokio::sync::mpsc::channel;
 use tokio::task;
 use tokio::time::Instant;
 use tokio_util::sync::CancellationToken;
-use crate::config::{ResticJob, ServiceConfiguration, ServiceConfigurationManager};
-use crate::jobs::JobRunner;
 
 pub struct ServiceHost {}
 
 impl ServiceHost {
     pub async fn run(_arguments: Vec<OsString>, cancellation_token: &CancellationToken) -> u8 {
+        let watcher = ServiceConfigurationManager::new()
+            .watch_configuration()
+            .await
+            .unwrap();
+
         while !cancellation_token.is_cancelled() {
-            let config = ServiceConfigurationManager::new()
-                .read_configuration()
-                .await
-                .expect("failed to read service configuration");
+            let configuration_cancellation_token = &cancellation_token.child_token();
+            watcher.register_cancellation_token(configuration_cancellation_token);
 
-            // TODO Config watching.
-
-            Self::run_with_config(config, cancellation_token).await;
+            let config = watcher.read_configuration().await.unwrap();
+            Self::run_with_config(config, configuration_cancellation_token).await;
         }
         0
     }

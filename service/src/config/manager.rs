@@ -1,10 +1,9 @@
-use crate::config::ServiceConfiguration;
-use crate::config::parser::parse_configuration;
-use log::debug;
+use crate::config::watcher::ConfigurationWithWatcher;
+use log::{debug, warn};
 use std::path::{Path, PathBuf};
 use std::{env, io};
 use thiserror::Error;
-use tokio::fs::{canonicalize, read_to_string, try_exists};
+use tokio::fs::{canonicalize, try_exists};
 
 #[derive(Default, Debug, Clone)]
 pub struct ServiceConfigurationManager {}
@@ -14,15 +13,24 @@ impl ServiceConfigurationManager {
         ServiceConfigurationManager {}
     }
 
-    pub async fn read_configuration(&self) -> Result<ServiceConfiguration, ConfigurationError> {
+    pub async fn watch_configuration(
+        &self,
+    ) -> Result<ConfigurationWithWatcher, ConfigurationError> {
         let config_path = self.locate_configuration_file().await?;
-        let toml = read_to_string(config_path).await?;
-        let config = parse_configuration(&toml)?;
-        Ok(config)
+        Ok(ConfigurationWithWatcher::new(config_path))
     }
 
+    // pub async fn read_configuration(&self) -> Result<ServiceConfiguration, ConfigurationError> {
+    //     let config_path = self.locate_configuration_file().await?;
+    //     let toml = read_to_string(config_path).await?;
+    //     let config = parse_configuration(&toml)?;
+    //     Ok(config)
+    // }
+
     pub async fn locate_configuration_file(&self) -> Result<String, ConfigurationError> {
-        for path in self.get_config_paths().into_iter() {
+        let paths = self.get_config_paths();
+
+        for path in paths.iter() {
             if try_exists(&path).await? {
                 let full_path = canonicalize(&path).await?.to_str().unwrap().to_owned();
                 debug!("Using configuration file found at '{full_path}'.");
@@ -33,10 +41,18 @@ impl ServiceConfigurationManager {
                 path.to_str().unwrap_or("<invalid path>")
             );
         }
+
+        let paths_str = paths
+            .into_iter()
+            .map(|x| x.to_str().unwrap_or("<invalid path>").to_owned())
+            .collect::<Vec<_>>()
+            .join(", ");
+        warn!("No configuration in [{paths_str}].");
+
         Err(ConfigurationError::ConfigurationFileMissing)
     }
 
-    fn get_config_paths(&self) -> impl IntoIterator<Item = PathBuf> {
+    fn get_config_paths(&self) -> Vec<PathBuf> {
         let current_exe = &env::current_exe().expect("current_exe should return a valid path");
         let exe_dir = current_exe
             .parent()
