@@ -1,0 +1,256 @@
+# Example configuration file for restic-service
+# This file demonstrates all available configuration options with their data types and default values
+
+# Version of the configuration format (required)
+# Type: int
+version = 1
+
+# Jobs configuration - define backup jobs by name
+# Type: object/map of job configurations
+# Default: empty (no jobs defined)
+[jobs]
+
+# Example backup job named "daily-backup"
+# You can define multiple jobs with different names
+[jobs.daily-backup]
+
+# Cron schedule for when this job should run (required)
+# Type: string
+# Format: standard cron expression (minute hour day month weekday)
+# Example: "0 2 * * *" runs daily at 2:00 AM
+cron = "0 2 * * *"
+
+# Restic repository location (required)
+# Type: string
+# Can be local path, SFTP, S3, etc.
+repository = "/path/to/backup/repository"
+
+# Repository password (required)
+# Type: string
+# Consider using environment variables for sensitive data
+password = "your-repository-password"
+
+# Environment variables for the backup process (optional)
+# Type: object/map of string key-value pairs
+# Default: empty
+[jobs.daily-backup.environment]
+RESTIC_CACHE_DIR = "/tmp/restic-cache"
+AWS_ACCESS_KEY_ID = "your-aws-key"
+AWS_SECRET_ACCESS_KEY = "your-aws-secret"
+
+# Backup job configuration (optional)
+# All fields have default values if not specified
+[jobs.daily-backup.backup]
+
+# Use filesystem snapshots during backup (optional)
+# Type: boolean
+# Default: true
+use_fs_snapshot = true
+
+# Enable verbose output (optional)
+# Type: boolean
+# Default: false
+verbose = false
+
+# Exclude cache directories (optional)
+# Type: boolean
+# Default: false
+exclude_caches = false
+
+# Backup all fixed drives automatically (optional)
+# Type: boolean
+# Default: false
+source_fixed_drives = false
+
+# Specific directories/files to backup (optional)
+# Type: array of strings
+# Default: empty array
+sources = [
+    "C:\\Users\\user\\Documents",
+]
+
+# Clean up cache after backup (optional)
+# Type: boolean
+# Default: false
+cleanup_cache = false
+
+# Stay within one filesystem (Unix/Linux only) (optional)
+# Type: boolean
+# Default: false
+# Note: This option is not available on Windows
+# one_file_system = false
+
+# Additional command-line flags to pass to restic backup (optional)
+# Type: array of strings
+# Default: empty array
+additional_flags = ["--exclude-file=/path/to/exclude-list.txt"]
+
+# Forget and prune configuration (optional)
+# Controls automatic cleanup of old backups
+[jobs.daily-backup.forget_and_purge]
+
+# Enable forget and prune operations (optional)
+# Type: boolean
+# Default: false
+enabled = true
+
+# Additional command-line flags for forget/prune operations (optional)
+# Type: array of strings
+# Default: empty array
+additional_flags = ["--verbose"]
+
+# Retention policy options (all optional)
+# These control how many backups to keep
+
+# Group snapshots by criteria (optional)
+# Type: string or null
+# Default: null
+# Common values: "host", "paths", "tags"
+group_by = "host,paths"
+
+# Keep the last N snapshots (optional)
+# Type: int or null
+# Default: null
+keep_last = 10
+
+# Keep hourly snapshots for N hours (optional)
+# Type: int or null
+# Default: null
+keep_hourly = 24
+
+# Keep daily snapshots for N days (optional)
+# Type: int or null
+# Default: null
+keep_daily = 7
+
+# Keep weekly snapshots for N weeks (optional)
+# Type: int or null
+# Default: null
+keep_weekly = 4
+
+# Keep monthly snapshots for N months (optional)
+# Type: int or null
+# Default: null
+keep_monthly = 12
+
+# Keep yearly snapshots for N years (optional)
+# Type: int or null
+# Default: null
+keep_yearly = 5
+
+# Keep snapshots within duration (optional)
+# Type: string or null
+# Default: null
+# Format: duration string like "1y2m3d4h5m6s"
+keep_within = "30d"
+
+# Keep hourly snapshots within duration (optional)
+# Type: string or null
+# Default: null
+keep_within_hourly = "1d"
+
+# Keep daily snapshots within duration (optional)
+# Type: string or null
+# Default: null
+keep_within_daily = "1w"
+
+# Keep weekly snapshots within duration (optional)
+# Type: string or null
+# Default: null
+keep_within_weekly = "1m"
+
+# Keep monthly snapshots within duration (optional)
+# Type: string or null
+# Default: null
+keep_within_monthly = "1y"
+
+# Keep yearly snapshots within duration (optional)
+# Type: string or null
+# Default: null
+keep_within_yearly = "10y"
+
+# Keep snapshots with specific tag (optional)
+# Type: string or null
+# Default: null
+keep_tag = "important"
+
+# Filtering options for forget operations (all optional)
+
+# Only consider snapshots from specific host (optional)
+# Type: string or null
+# Default: null
+host = "backup-server"
+
+# Only consider snapshots with specific tag (optional)
+# Type: string or null
+# Default: null
+tag = "daily"
+
+# Only consider snapshots with specific path (optional)
+# Type: string or null
+# Default: null
+path = "/home"
+
+# Behavior options (all optional)
+
+# Allow removing all snapshots (dangerous) (optional)
+# Type: boolean
+# Default: false
+unsafe_allow_remove_all = false
+
+# Compact repository after forget (optional)
+# Type: boolean
+# Default: false
+compact = false
+
+# Perform dry run without making changes (optional)
+# Type: boolean
+# Default: false
+dry_run = false
+
+# Run prune after forget (optional)
+# Type: boolean
+# Default: false
+prune = true
+
+# Prune-specific options (all optional)
+
+# Maximum unused data to keep (optional)
+# Type: string or null
+# Default: null
+# Format: size string like "100M", "1G"
+max_unused = "100M"
+
+# Maximum size of pack files to repack (optional)
+# Type: string or null
+# Default: null
+max_repack_size = "1G"
+
+# Only repack cacheable pack files (optional)
+# Type: boolean
+# Default: false
+repack_cacheable_only = false
+
+# Repack small pack files (optional)
+# Type: boolean
+# Default: false
+repack_small = false
+
+# Repack uncompressed pack files (optional)
+# Type: boolean
+# Default: false
+repack_uncompressed = false
+
+# Repack pack files smaller than size (optional)
+# Type: string or null
+# Default: null
+repack_smaller_than = "10M"
+
+# Example of a second job with minimal configuration
+[jobs.weekly-full]
+cron = "0 3 * * 0"  # Weekly on Sunday at 3:00 AM
+repository = "s3:s3.amazonaws.com/my-backup-bucket"
+password = "different-password"
+
+[jobs.weekly-full.backup]
+source_fixed_drives = true
