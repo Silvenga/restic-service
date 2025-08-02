@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use std::fmt::{Display, Formatter};
 
 /// A backup error message from restic (e.g. a file disappeared during backup)
 #[derive(Deserialize, Debug, Clone, Eq, PartialEq)]
@@ -14,6 +15,18 @@ pub struct BackupError {
 #[derive(Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct Error {
     pub message: String,
+}
+
+impl Display for BackupError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "'{message}' on '{item}' (during {during})",
+            message = self.error.message,
+            item = self.item,
+            during = self.during
+        )
+    }
 }
 
 #[cfg(test)]

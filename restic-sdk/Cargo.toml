@@ -14,7 +14,7 @@ serde = { version = "1.0.219", features = ["derive"] }
 tokio = { workspace = true, features = ["macros", "process", "io-util"] }
 log = "0.4.27"
 pathsearch = "0.2.0"
-chrono = { version = "0.4.41", features = ["serde"] }
+chrono = { version = "0.4.41", features = ["serde", "std"], default-features = false }
 tokio-util = "0.7.15"
 
 [dev-dependencies]

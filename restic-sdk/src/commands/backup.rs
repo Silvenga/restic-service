@@ -10,7 +10,7 @@ impl Restic {
         paths: impl IntoIterator<Item = impl BuilderValue>,
         options: BackupOptions,
         cancellation_token: &CancellationToken,
-    ) -> Result<BackupSummary, ResticError> {
+    ) -> Result<BackupResult, ResticError> {
         let arguments = options
             .builder
             .with_verb("backup")
@@ -18,34 +18,57 @@ impl Restic {
 
         let mut summary: Option<BackupSummary> = None;
 
-        self.exec_json(
-            arguments,
-            |message: ResticBackupMessage| match message {
-                ResticBackupMessage::BackupSummary(message) => summary = Some(message),
-                ResticBackupMessage::BackupStatus(_) => {
-                    debug!("Backup status: {message:?}");
-                }
-                ResticBackupMessage::BackupError(error) => {
-                    debug!("Error reported by restic during backup: {error:?}")
-                }
-                ResticBackupMessage::ExitError(error) => {
-                    warn!("Exit error reported by restic: {error:?}")
-                }
-                ResticBackupMessage::BackupVerboseStatus(_) => {
-                    // Ignored.
-                }
-            },
-            cancellation_token,
-        )
-        .await?;
+        let result = self
+            .exec_json(
+                arguments,
+                |message: ResticBackupMessage| match message {
+                    ResticBackupMessage::BackupSummary(message) => summary = Some(message),
+                    ResticBackupMessage::BackupStatus(_) => {
+                        debug!("Backup status: {message:?}");
+                    }
+                    ResticBackupMessage::BackupError(error) => {
+                        warn!("Backup error: {error}")
+                    }
+                    ResticBackupMessage::ExitError(error) => {
+                        warn!(
+                            "Restic will exit with error: {error} (code: {code})",
+                            error = error.message,
+                            code = error.code
+                        );
+                    }
+                    ResticBackupMessage::BackupVerboseStatus(_) => {
+                        // Ignored.
+                    }
+                },
+                cancellation_token,
+            )
+            .await;
 
-        match summary {
-            Some(summary) => Ok(summary),
-            None => Err(ResticError::UnexpectedResponse(
+        match (result, summary) {
+            (Ok(_), Some(summary)) => Ok(BackupResult {
+                failed_to_read_some_data: false,
+                summary,
+            }),
+            (Err(ResticError::BackupFailedToReadSomeSourceData), Some(summary)) => {
+                Ok(BackupResult {
+                    failed_to_read_some_data: true,
+                    summary,
+                })
+            }
+            (Err(e), _) => Err(e),
+            (Ok(_), None) => Err(ResticError::UnexpectedResponse(
                 "Backup did not return a summary".to_string(),
             )),
         }
     }
+}
+
+pub struct BackupResult {
+    /// Non-fatal error that denotes that one or more files could not be read during backup.
+    failed_to_read_some_data: bool,
+
+    /// The summary of the backup operation.
+    summary: BackupSummary,
 }
 
 #[derive(Debug, Clone, Default)]
