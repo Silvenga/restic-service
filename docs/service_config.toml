@@ -10,9 +10,9 @@ version = 1
 # Default: empty (no jobs defined)
 [jobs]
 
-# Example backup job named "daily-backup"
+# Example backup job named "daily_backup"
 # You can define multiple jobs with different names
-[jobs.daily-backup]
+[jobs.daily_backup]
 
 # Cron schedule for when this job should run (required)
 # Type: string
@@ -34,13 +34,20 @@ password = "your-repository-password"
 # Environment variables for the backup process (optional)
 # Type: object/map of string key-value pairs
 # Default: empty
-[jobs.daily-backup.environment]
+[jobs.daily_backup.environment]
 AWS_ACCESS_KEY_ID = "your-aws-key"
 AWS_SECRET_ACCESS_KEY = "your-aws-secret"
 
+# Clear locks job configuration (optional
+[jobs.daily_backup.clear_locks]
+
+# Automatically attempt to clear stale locks (optional)
+# Type: boolean
+# Default: true
+enabled = false
+
 # Backup job configuration (optional)
-# All fields have default values if not specified
-[jobs.daily-backup.backup]
+[jobs.daily_backup.backup]
 
 # Use filesystem snapshots during backup (optional)
 # Type: boolean
@@ -87,7 +94,7 @@ additional_flags = ["--exclude-file=C:\\exclude-list.txt"]
 
 # Forget and prune configuration (optional)
 # Controls automatic cleanup of old backups
-[jobs.daily-backup.forget_and_purge]
+[jobs.daily_backup.forget_and_purge]
 
 # Enable forget and prune operations (optional)
 # Type: boolean

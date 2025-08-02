@@ -19,5 +19,5 @@ async fn command_backup() {
         )
         .await;
 
-    assert!(summary.unwrap().snapshot_id.is_some());
+    assert!(summary.unwrap().summary.snapshot_id.is_some());
 }

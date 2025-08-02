@@ -77,7 +77,6 @@ impl BackupJob {
             for disk in disks.list() {
                 if !disk.is_removable() {
                     if let Some(mount_point) = disk.mount_point().to_str() {
-                        info!("Adding disk source: '{mount_point:?}'");
                         sources.push(mount_point.to_owned());
                     } else {
                         warn!("Failed to convert disk '{disk:?}' to string, it will be ignored.");

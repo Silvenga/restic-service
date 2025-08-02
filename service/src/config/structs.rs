@@ -18,10 +18,27 @@ pub struct ResticJob {
     // Optional
     #[serde(default)]
     pub environment: HashMap<String, String>,
+
     #[serde(default)]
     pub backup: BackupJobConfiguration,
+
+    #[serde(default)]
+    pub clear_locks: ClearLocksJobConfiguration,
+
     #[serde(default)]
     pub forget_and_purge: ForgetConfiguration,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
+pub struct ClearLocksJobConfiguration {
+    pub enabled: bool,
+}
+
+impl Default for ClearLocksJobConfiguration {
+    fn default() -> Self {
+        ClearLocksJobConfiguration { enabled: true }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

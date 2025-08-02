@@ -63,12 +63,13 @@ impl Restic {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct BackupResult {
     /// Non-fatal error that denotes that one or more files could not be read during backup.
-    failed_to_read_some_data: bool,
+    pub failed_to_read_some_data: bool,
 
     /// The summary of the backup operation.
-    summary: BackupSummary,
+    pub summary: BackupSummary,
 }
 
 #[derive(Debug, Clone, Default)]

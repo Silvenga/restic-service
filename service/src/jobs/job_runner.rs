@@ -1,6 +1,7 @@
 use super::forget_job::ForgetJob;
 use crate::config::ResticJob;
 use crate::jobs::backup_job::BackupJob;
+use crate::jobs::clear_locks::ClearLocksJob;
 use log::{info, warn};
 use restic_sdk::errors::ResticError;
 use restic_sdk::{Restic, ResticConfig};
@@ -15,6 +16,12 @@ impl JobRunner {
         Self::run_job(
             &client,
             BackupJob::new(&job_config.backup),
+            cancellation_token,
+        )
+        .await;
+        Self::run_job(
+            &client,
+            ClearLocksJob::new(&job_config.clear_locks),
             cancellation_token,
         )
         .await;
