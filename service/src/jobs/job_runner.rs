@@ -13,18 +13,21 @@ pub struct JobRunner {}
 impl JobRunner {
     pub async fn run(job_config: &ResticJob, cancellation_token: &CancellationToken) {
         let client = Self::build_restic_client(job_config);
-        Self::run_job(
-            &client,
-            BackupJob::new(&job_config.backup),
-            cancellation_token,
-        )
-        .await;
+
         Self::run_job(
             &client,
             ClearLocksJob::new(&job_config.clear_locks),
             cancellation_token,
         )
         .await;
+
+        Self::run_job(
+            &client,
+            BackupJob::new(&job_config.backup),
+            cancellation_token,
+        )
+        .await;
+
         Self::run_job(
             &client,
             ForgetJob::new(&job_config.forget_and_purge),

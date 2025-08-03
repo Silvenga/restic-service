@@ -9,7 +9,9 @@ impl Restic {
     /// Performs `restic unlock`.
     pub async fn unlock(&self, cancellation_token: &CancellationToken) -> Result<(), ResticError> {
         self.exec(
-            ArgumentsBuilder::new().with_verb("unlock"),
+            ArgumentsBuilder::new()
+                .with_verb("unlock")
+                .with_flag("json"),
             |message, output_type| warn!("{output_type}: {message}"),
             cancellation_token,
         )

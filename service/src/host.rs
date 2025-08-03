@@ -1,3 +1,4 @@
+use crate::api::run_server;
 use crate::config::{ResticJob, ServiceConfiguration, ServiceConfigurationManager};
 use crate::jobs::JobRunner;
 use async_cron_scheduler::{Job, Scheduler};
@@ -16,7 +17,7 @@ impl ServiceHost {
         let watcher = ServiceConfigurationManager::new()
             .watch_configuration()
             .await
-            .unwrap();
+            .expect("configuration file must exist to watch");
 
         while !cancellation_token.is_cancelled() {
             let configuration_cancellation_token = &cancellation_token.child_token();
@@ -87,6 +88,7 @@ impl ServiceHost {
             // Drops the scheduler...
         };
 
+        run_server(cancellation_token).await.unwrap();
         main_task.await;
         jobs_task.await.unwrap();
         cron_task.await.unwrap();

@@ -11,6 +11,7 @@ pub fn uninstall_service() -> Result<(), windows_service::Error> {
 pub fn start_service() -> Result<(), windows_service::Error> {
     todo!()
 }
+
 pub fn stop_service() -> Result<(), windows_service::Error> {
     todo!()
 }

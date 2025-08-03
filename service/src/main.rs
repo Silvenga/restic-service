@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate windows_service;
+mod api;
 pub(crate) mod cli;
 pub(crate) mod config;
 mod host;
@@ -58,7 +59,7 @@ async fn main_cli() -> ExitCode {
         .use_windows_line_ending()
         .write_mode(WriteMode::BufferAndFlush)
         .append()
-        .adaptive_format_for_stdout(AdaptiveFormat::Detailed)
+        .adaptive_format_for_stdout(AdaptiveFormat::Default)
         .start()
         .unwrap();
 
