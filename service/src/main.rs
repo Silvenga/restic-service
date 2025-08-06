@@ -53,7 +53,7 @@ fn main() -> ExitCode {
 
 #[tokio::main]
 async fn main_cli() -> ExitCode {
-    let _logger = Logger::try_with_env_or_str("info")
+    let _logger = Logger::try_with_env_or_str("debug")
         .unwrap()
         .log_to_stdout()
         .use_windows_line_ending()
@@ -105,7 +105,7 @@ async fn main_cli() -> ExitCode {
 
 #[tokio::main]
 async fn main_service(arguments: Vec<OsString>) {
-    let _logger = Logger::try_with_env_or_str("info")
+    let _logger = Logger::try_with_env_or_str("debug")
         .unwrap()
         .log_to_file(
             FileSpec::default()

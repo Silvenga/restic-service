@@ -1,7 +1,7 @@
 use actix_web::{get, web};
 use serde::{Deserialize, Serialize};
 
-#[get("/api/v1/health")]
+#[get("/health")]
 async fn health() -> web::Json<HealthResponse> {
     web::Json(HealthResponse { ok: true })
 }

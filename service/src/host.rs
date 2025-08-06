@@ -1,16 +1,18 @@
 use crate::api::run_server;
 use crate::config::{ResticJob, ServiceConfiguration, ServiceConfigurationManager};
-use crate::jobs::JobRunner;
+use crate::jobs::{JobManager, JobRunner};
 use async_cron_scheduler::{Job, Scheduler};
 use chrono::Local;
 use log::{info, warn};
 use std::ffi::OsString;
+use std::sync::Arc;
+use tokio::runtime::Handle;
 use tokio::sync::mpsc::channel;
 use tokio::task;
 use tokio::time::Instant;
 use tokio_util::sync::CancellationToken;
 
-pub struct ServiceHost {}
+pub struct ServiceHost;
 
 impl ServiceHost {
     pub async fn run(_arguments: Vec<OsString>, cancellation_token: &CancellationToken) -> u8 {
@@ -46,49 +48,64 @@ impl ServiceHost {
             let cancellation_token = cancellation_token.clone();
             async move {
                 while !cancellation_token.is_cancelled() {
-                    if let Some((job_name, job_config)) = receiver.recv().await {
-                        info!("Job '{job_name}' is running.");
-                        let start = Instant::now();
+                    tokio::select! {
+                        job = receiver.recv() => {
+                            if let Some((job_name, job_config)) = job {
+                                info!("Job '{job_name}' is running.");
+                                let start = Instant::now();
 
-                        JobRunner::run(&job_config, &cancellation_token).await;
+                                JobRunner::run(&job_config, &cancellation_token).await;
 
-                        info!(
-                            "Job '{job_name}' is stopped after running for {:?}.",
-                            start.elapsed()
-                        );
+                                info!(
+                                    "Job '{job_name}' is stopped after running for {:?}.",
+                                    start.elapsed()
+                                );
+                            }
+                        }
+                        _ = cancellation_token.cancelled() => { }
                     }
                 }
             }
         });
 
-        let main_task = async move {
-            // Move the scheduler into the main task.
-            for (job_name, job_config) in config.jobs {
-                info!(
-                    "Scheduling job '{job_name}' with cron: '{}'.",
-                    job_config.cron
-                );
+        let job_manager = Arc::new(JobManager::new(config, sender));
 
-                let job = Job::cron(&format!("0 {}", job_config.cron)).unwrap();
-                scheduler
-                    .insert(job, {
-                        let job_config = job_config.clone();
-                        let sender = sender.clone();
-                        move |_| {
-                            info!("Job '{job_name}' is queued.");
-                            sender
-                                .try_send((job_name.clone(), job_config.clone()))
-                                .unwrap();
-                        }
-                    })
-                    .await;
+        let main_task = {
+            let job_manager = job_manager.clone();
+            async move {
+                // Move the scheduler into the main task.
+                for (job_name, job_config) in job_manager.get_jobs() {
+                    info!(
+                        "Scheduling job '{job_name}' with cron: '{}'.",
+                        job_config.cron
+                    );
+
+                    let job = Job::cron(&format!("0 {}", job_config.cron)).unwrap();
+                    scheduler
+                        .insert(job, {
+                            let jobs_manager = job_manager.clone();
+                            move |_| {
+                                let handle = Handle::current();
+                                handle.block_on(async {
+                                    match jobs_manager.queue_job(job_name.clone()).await {
+                                        Ok(_) => (),
+                                        Err(_) => {
+                                            warn!("Failed to queue job '{job_name}' for execution.")
+                                        }
+                                    };
+                                });
+                            }
+                        })
+                        .await;
+                }
+                cancellation_token.cancelled().await;
+                info!("Stopping jobs...");
+                // Drops the scheduler...
             }
-            cancellation_token.cancelled().await;
-            info!("Stopping jobs...");
-            // Drops the scheduler...
         };
 
-        run_server(cancellation_token).await.unwrap();
+        run_server(&job_manager, cancellation_token).await.unwrap();
+
         main_task.await;
         jobs_task.await.unwrap();
         cron_task.await.unwrap();
