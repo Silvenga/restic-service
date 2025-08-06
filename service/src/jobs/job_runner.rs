@@ -41,6 +41,10 @@ impl JobRunner {
         job: impl RunnableJob,
         cancellation_token: &CancellationToken,
     ) {
+        if cancellation_token.is_cancelled() {
+            return;
+        }
+
         let job_name = job.get_job_name();
         let start = Instant::now();
 
