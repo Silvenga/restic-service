@@ -5,9 +5,9 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum AppApiError {
-    #[error("job not found")]
+    #[error("Job not found")]
     JobNotFound,
-    #[error("internal server error")]
+    #[error("Internal server error")]
     InternalServerError,
 }
 
@@ -22,8 +22,8 @@ impl error::ResponseError for AppApiError {
         HttpResponse::build(self.status_code())
             .insert_header(ContentType::json())
             .body(format!(
-                r#"{{"message":"{self}", code:"{code}"}}"#,
-                code = self.status_code()
+                r#"{{"message":"{self}","code":"{code}"}}"#,
+                code = self.status_code().as_u16()
             ))
     }
 }

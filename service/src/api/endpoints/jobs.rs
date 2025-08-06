@@ -15,9 +15,10 @@ pub async fn get_jobs(data: web::Data<ApiState>) -> web::Json<GetJobsResponse> {
 
 #[get("/jobs/{id}")]
 pub async fn get_job_by_id(
-    id: String,
+    path: web::Path<String>,
     data: web::Data<ApiState>,
 ) -> Result<web::Json<GetJobByIdResponse>, AppApiError> {
+    let id = path.into_inner();
     let jobs: Vec<_> = data
         .job_manager
         .get_jobs()
@@ -35,9 +36,10 @@ pub async fn get_job_by_id(
 
 #[post("/jobs/{id}/queue")]
 pub async fn queue_job_by_id(
-    id: String,
+    path: web::Path<String>,
     data: web::Data<ApiState>,
 ) -> Result<web::Json<()>, AppApiError> {
+    let id = path.into_inner();
     match data.job_manager.queue_job(id).await {
         Ok(_) => Ok(web::Json(())),
         Err(QueueJobError::JobNotFound(_)) => Err(AppApiError::JobNotFound),
