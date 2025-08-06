@@ -1,2 +1,20 @@
 # Config for design-time testing.
+# See https://github.com/Silvenga/restic-service/blob/master/docs/service_config.toml
 version = 1
+
+[jobs.system]
+# At 4am
+cron = "0 4 * * *"
+repository = "./restic-repo"
+password = "LlENSonwkqNQ1c9zbv8M"
+
+[jobs.system.backup]
+exclude_caches = true
+
+[jobs.system.forget_and_purge]
+enabled = true
+keep_last = 1
+prune = true
+
+[jobs.system.environment]
+RESTIC_READ_CONCURRENCY = "8"

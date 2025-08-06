@@ -10,7 +10,7 @@ pub async fn run_server(
     cancellation_token: &CancellationToken,
 ) -> std::io::Result<()> {
     let server_cancellation_token = cancellation_token.child_token();
-    HttpServer::new({
+    let server = HttpServer::new({
         let job_manager = job_manager.clone();
         move || {
             let api = web::scope("/api/v1")
@@ -28,6 +28,7 @@ pub async fn run_server(
     .shutdown_signal(server_cancellation_token.cancelled_owned())
     .workers(2)
     .server_hostname("Restic Service")
-    .run()
-    .await
+    .run();
+
+    server.await
 }

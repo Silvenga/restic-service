@@ -33,13 +33,16 @@ impl ServiceHost {
                 }
             };
         }
+
+        info!("Stopped the service host successfully.");
+
         0
     }
 
     async fn run_with_config(config: ServiceConfiguration, cancellation_token: &CancellationToken) {
-        info!("Starting {} jobs...", config.jobs.len());
-
         let (sender, mut receiver) = channel::<(String, ResticJob)>(256);
+        let job_manager_ref = Arc::new(JobManager::new(config, sender));
+
         let (mut scheduler, sched_service) = Scheduler::<Local>::launch(tokio::time::sleep);
 
         let cron_task = task::spawn(sched_service);
@@ -65,16 +68,25 @@ impl ServiceHost {
                         _ = cancellation_token.cancelled() => { }
                     }
                 }
+
+                info!("Job worker is stopped.");
             }
         });
 
-        let job_manager = Arc::new(JobManager::new(config, sender));
-
-        let main_task = {
-            let job_manager = job_manager.clone();
+        let server_task = task::spawn({
+            let job_manager_ref = job_manager_ref.clone();
+            let cancellation_token = cancellation_token.clone();
             async move {
-                // Move the scheduler into the main task.
-                for (job_name, job_config) in job_manager.get_jobs() {
+                run_server(&job_manager_ref, &cancellation_token).await.unwrap();
+            }
+        });
+
+        let main_task = task::spawn({
+            let job_manager_ref = job_manager_ref.clone();
+            let cancellation_token = cancellation_token.clone();
+            async move {
+                info!("Setting up {} jobs...", job_manager_ref.get_jobs().len());
+                for (job_name, job_config) in job_manager_ref.get_jobs() {
                     info!(
                         "Scheduling job '{job_name}' with cron: '{}'.",
                         job_config.cron
@@ -83,7 +95,7 @@ impl ServiceHost {
                     let job = Job::cron(&format!("0 {}", job_config.cron)).unwrap();
                     scheduler
                         .insert(job, {
-                            let jobs_manager = job_manager.clone();
+                            let jobs_manager = job_manager_ref.clone();
                             move |_| {
                                 let handle = Handle::current();
                                 handle.block_on(async {
@@ -99,15 +111,14 @@ impl ServiceHost {
                         .await;
                 }
                 cancellation_token.cancelled().await;
-                info!("Stopping jobs...");
+                info!("Cancellation triggered, stopping jobs...");
                 // Drops the scheduler...
             }
-        };
+        });
 
-        run_server(&job_manager, cancellation_token).await.unwrap();
-
-        main_task.await;
+        main_task.await.unwrap();
         jobs_task.await.unwrap();
         cron_task.await.unwrap();
+        server_task.await.unwrap();
     }
 }
