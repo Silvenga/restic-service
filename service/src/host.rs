@@ -77,7 +77,9 @@ impl ServiceHost {
             let job_manager_ref = job_manager_ref.clone();
             let cancellation_token = cancellation_token.clone();
             async move {
-                run_server(&job_manager_ref, &cancellation_token).await.unwrap();
+                run_server(&job_manager_ref, &cancellation_token)
+                    .await
+                    .unwrap();
             }
         });
 
@@ -95,11 +97,13 @@ impl ServiceHost {
                     let job = Job::cron(&format!("0 {}", job_config.cron)).unwrap();
                     scheduler
                         .insert(job, {
-                            let jobs_manager = job_manager_ref.clone();
+                            let jobs_manager_ref = job_manager_ref.clone();
                             move |_| {
                                 let handle = Handle::current();
-                                handle.block_on(async {
-                                    match jobs_manager.queue_job(job_name.clone()).await {
+                                let job_name = job_name.clone();
+                                let jobs_manager_ref = jobs_manager_ref.clone();
+                                handle.spawn(async move {
+                                    match jobs_manager_ref.queue_job(job_name.clone()).await {
                                         Ok(_) => (),
                                         Err(_) => {
                                             warn!("Failed to queue job '{job_name}' for execution.")
