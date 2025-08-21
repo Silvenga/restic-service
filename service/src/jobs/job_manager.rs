@@ -14,6 +14,10 @@ impl JobManager {
         Self { config, sender }
     }
 
+    pub fn get_job_names(&self) -> impl Iterator<Item = &String> {
+        self.config.jobs.keys()
+    }
+
     pub fn get_jobs(&self) -> Vec<(String, ResticJob)> {
         self.config
             .jobs

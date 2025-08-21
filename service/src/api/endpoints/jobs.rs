@@ -5,11 +5,11 @@ use crate::jobs::QueueJobError;
 use actix_web::{get, post, web};
 use log::warn;
 use serde::Serialize;
-use std::collections::HashMap;
+use std::collections::HashSet;
 
 #[get("/jobs")]
 pub async fn get_jobs(data: web::Data<ApiState>) -> web::Json<GetJobsResponse> {
-    let jobs = data.job_manager.get_jobs().into_iter().collect();
+    let jobs = data.job_manager.get_job_names().cloned().collect();
     web::Json(jobs)
 }
 
@@ -24,7 +24,10 @@ pub async fn get_job_by_id(
         .get_jobs()
         .into_iter()
         .filter(|(job_id, _)| job_id == &id)
-        .map(|(job_id, job)| GetJobByIdResponse { job_id, job })
+        .map(|(job_id, job)| GetJobByIdResponse {
+            job_id,
+            job: sanitize_restic_job(job),
+        })
         .collect();
 
     if jobs.is_empty() {
@@ -52,10 +55,16 @@ pub async fn queue_job_by_id(
     }
 }
 
-pub type GetJobsResponse = HashMap<String, ResticJob>;
+pub type GetJobsResponse = HashSet<String>;
 
 #[derive(Serialize)]
 pub struct GetJobByIdResponse {
     job_id: String,
     job: ResticJob,
+}
+
+fn sanitize_restic_job(job: ResticJob) -> ResticJob {
+    let mut sanitized_job = job.clone();
+    sanitized_job.password = "*".repeat(sanitized_job.password.len());
+    sanitized_job
 }
