@@ -70,10 +70,10 @@ jobs:
         shell: pwsh
         run: |
           cd ./src/monitor/
-          cargo build --release --target x86_64-pc-windows-msvc
+          cargo build --release
 
       - uses: actions/upload-artifact@v4
         with:
-          name: montior
+          name: monitor
           path: |
             target/release/restic-monitor.exe
