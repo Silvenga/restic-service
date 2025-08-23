@@ -1,8 +1,8 @@
 use crate::api::run_server;
-use crate::config::{ResticJob, ServiceConfiguration, ServiceConfigurationManager};
 use crate::jobs::{JobManager, JobRunner};
 use async_cron_scheduler::{Job, Scheduler};
 use chrono::Local;
+use common::config::{ResticJob, ServiceConfiguration, ServiceConfigurationManager};
 use log::{info, warn};
 use std::ffi::OsString;
 use std::sync::Arc;

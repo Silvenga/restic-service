@@ -1,7 +1,7 @@
 use crate::config::watcher::ConfigurationWithWatcher;
 use log::{debug, warn};
 use std::path::{Path, PathBuf};
-use std::{env, io};
+use std::{env, io, path};
 use thiserror::Error;
 use tokio::fs::{canonicalize, try_exists};
 
@@ -42,12 +42,18 @@ impl ServiceConfigurationManager {
             );
         }
 
-        let paths_str = paths
-            .into_iter()
-            .map(|x| x.to_str().unwrap_or("<invalid path>").to_owned())
-            .collect::<Vec<_>>()
-            .join(", ");
-        warn!("No configuration in [{paths_str}].");
+        // Failure path:
+        let mut resolved_paths = Vec::with_capacity(paths.len());
+        for path in paths.into_iter() {
+            let path = path::absolute(path)
+                .unwrap_or("<failed to resolve>".into())
+                .to_str()
+                .unwrap_or("<failed to convert>")
+                .to_owned();
+            resolved_paths.push(path);
+        }
+        let resolved_paths = resolved_paths.join(", ");
+        warn!("No configuration in [{resolved_paths}].");
 
         Err(ConfigurationError::ConfigurationFileMissing)
     }

@@ -1,8 +1,8 @@
 use crate::api::errors::AppApiError;
 use crate::api::state::ApiState;
-use crate::config::ResticJob;
 use crate::jobs::QueueJobError;
 use actix_web::{get, post, web};
+use common::config::ResticJob;
 use log::warn;
 use serde::Serialize;
 use std::collections::HashSet;

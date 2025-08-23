@@ -1,4 +1,4 @@
-use crate::config::{ResticJob, ServiceConfiguration};
+use common::config::{ResticJob, ServiceConfiguration};
 use log::info;
 use thiserror::Error;
 use tokio::sync::mpsc::Sender;

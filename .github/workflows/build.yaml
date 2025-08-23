@@ -11,8 +11,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  check-rust:
-    name: Build
+  check:
+    name: Check
     runs-on: windows-2025
     steps:
       - uses: actions/checkout@v4
@@ -24,9 +24,18 @@ jobs:
         run: |
           winget install --exact --id restic.restic --scope Machine --accept-source-agreements --accept-source-agreements
           "C:\Program Files\WinGet\Links\" >> $env:GITHUB_PATH
-
       - name: Test
         run: cargo test --no-fail-fast
+
+  build-service:
+    name: Build Service
+    needs: check
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
 
       - uses: cargo-bins/cargo-binstall@main
       - name: Add msbuild to PATH
@@ -43,12 +52,33 @@ jobs:
       - name: Build Installer
         shell: pwsh
         run: |
-          cd ./service/
+          cd ./src/service/
           cargo wix --verbose --package service --output restic-service-installer.msi
 
       - uses: actions/upload-artifact@v4
         with:
-          name: publish
+          name: service
           path: |
-            service/restic-service-installer.msi
-            target/release/restic-service.exe
+            src/service/restic-service-installer.msi
+
+  build-monitor:
+    name: Build Monitor
+    needs: check
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Build Installer
+        shell: pwsh
+        run: |
+          cd ./src/monitor/
+          cargo build --release --target x86_64-pc-windows-msvc
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: montior
+          path: |
+            target/release/restic-monitor.exe

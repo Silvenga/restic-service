@@ -2,23 +2,22 @@
 extern crate windows_service;
 mod api;
 pub(crate) mod cli;
-pub(crate) mod config;
 mod host;
 mod jobs;
 pub(crate) mod management;
 pub(crate) mod paths;
 pub(crate) mod service;
 
-use crate::cli::{Verb, parse_args};
+use crate::cli::{parse_args, Verb};
 use crate::host::ServiceHost;
 use crate::management::{
-    SERVICE_NAME, install_service, restart_service, start_service, status_service, stop_service,
-    uninstall_service,
+    install_service, restart_service, start_service, status_service, stop_service, uninstall_service,
+    SERVICE_NAME,
 };
 use crate::paths::get_exe_directory;
 use crate::service::ServiceStatusHandlerExtension;
 use flexi_logger::{
-    AdaptiveFormat, Cleanup, Criterion, FileSpec, Logger, Naming, WriteMode, detailed_format,
+    detailed_format, AdaptiveFormat, Cleanup, Criterion, FileSpec, Logger, Naming, WriteMode,
 };
 use log::info;
 use std::env;

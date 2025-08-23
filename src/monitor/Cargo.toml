@@ -1,6 +1,6 @@
 [package]
-name = "service"
-description = "The actual Windows service."
+name = "monitor"
+description = "The user-land monitor/tray application for the service."
 version.workspace = true
 authors.workspace = true
 repository.workspace = true
@@ -9,24 +9,19 @@ edition.workspace = true
 publish.workspace = true
 
 [[bin]]
-name = "restic-service"
+name = "restic-monitor"
 path = "src/main.rs"
 
 [dependencies]
+common = { path = "../common" }
 tokio = { workspace = true, features = ["rt-multi-thread", "rt", "macros", "process", "io-util", "fs", "time"] }
 tokio-util = "0.7.15"
-windows-service = "0.8"
 clap = { version = "4.5.40", features = ["derive"] }
 log = "0.4.27"
 thiserror = "2.0.12"
-restic-sdk = { path = "../restic-sdk" }
 toml = "0.9.1"
 serde = "1.0.219"
-async-cron-scheduler = "2.0.1"
-notify-debouncer-full = { version = "0.5.0", default-features = false }
 log-panics = { version = "2.1.0", features = ["with-backtrace"] }
 chrono = "0.4.41"
-ctrlc = { version = "3.4.7", features = ["termination"] }
-sysinfo = { version = "0.36.0", default-features = false, features = ["disk"] }
 flexi_logger = "0.31.2"
 actix-web = "4.11.0"

@@ -3,9 +3,11 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/service/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/restic-sdk/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/restic-sdk/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/common/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/monitor/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/restic-sdk/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/restic-sdk/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/service/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

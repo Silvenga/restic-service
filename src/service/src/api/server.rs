@@ -1,8 +1,8 @@
 use crate::api::endpoints::{get_job_by_id, get_jobs, health, queue_job_by_id};
 use crate::api::state::ApiState;
-use crate::config::ApiConfiguration;
 use crate::jobs::JobManager;
 use actix_web::{App, HttpServer, web};
+use common::config::ApiConfiguration;
 use std::sync::Arc;
 use tokio_util::sync::CancellationToken;
 

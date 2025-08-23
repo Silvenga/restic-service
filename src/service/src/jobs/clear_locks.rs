@@ -1,5 +1,5 @@
-use crate::config::ClearLocksJobConfiguration;
 use crate::jobs::RunnableJob;
+use common::config::ClearLocksJobConfiguration;
 use log::{debug, info, warn};
 use restic_sdk::Restic;
 use restic_sdk::errors::ResticError;

@@ -1,5 +1,5 @@
-use crate::config::ForgetConfiguration;
 use crate::jobs::RunnableJob;
+use common::config::ForgetConfiguration;
 use log::info;
 use restic_sdk::Restic;
 use restic_sdk::errors::ResticError;
