@@ -37,17 +37,12 @@ jobs:
         with:
           toolchain: stable
 
-      - uses: cargo-bins/cargo-binstall@main
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
       - name: Install WiX
         run: |
           dotnet tool install --global wix
-
-          # Swatinem/rust-cache via actions-rust-lang/setup-rust-toolchain is not compatible with binstall.
-          # https://github.com/Swatinem/rust-cache/issues/204
-          # binstall fails to restore the bin if the crate was already cached.
-          cargo binstall --force cargo-wix
+          cargo install cargo-wix
 
       - name: Build Installer
         shell: pwsh
