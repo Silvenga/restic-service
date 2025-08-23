@@ -2,6 +2,9 @@
 # See https://github.com/Silvenga/restic-service/blob/master/docs/service_config.toml
 version = 1
 
+[api]
+port = 42039
+
 [jobs.system]
 # At 4am
 cron = "0 4 * * *"
@@ -10,6 +13,9 @@ password = "LlENSonwkqNQ1c9zbv8M"
 
 [jobs.system.backup]
 exclude_caches = true
+sources = ["./restic-sdk"]
+cleanup_cache = true
+use_fs_snapshot = false
 
 [jobs.system.forget_and_purge]
 enabled = true

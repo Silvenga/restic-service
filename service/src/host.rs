@@ -41,7 +41,7 @@ impl ServiceHost {
 
     async fn run_with_config(config: ServiceConfiguration, cancellation_token: &CancellationToken) {
         let (sender, mut receiver) = channel::<(String, ResticJob)>(256);
-        let job_manager_ref = Arc::new(JobManager::new(config, sender));
+        let job_manager_ref = Arc::new(JobManager::new(config.clone(), sender));
 
         let (mut scheduler, sched_service) = Scheduler::<Local>::launch(tokio::time::sleep);
 
@@ -77,7 +77,7 @@ impl ServiceHost {
             let job_manager_ref = job_manager_ref.clone();
             let cancellation_token = cancellation_token.clone();
             async move {
-                run_server(&job_manager_ref, &cancellation_token)
+                run_server(&config.api, &job_manager_ref, &cancellation_token)
                     .await
                     .unwrap();
             }

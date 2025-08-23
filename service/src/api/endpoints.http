@@ -1,11 +1,11 @@
 ### health
-GET http://127.0.0.1:42038/api/v1/health
+GET {{base_url}}/api/v1/health
 
 ### jobs
-GET http://127.0.0.1:42038/api/v1/jobs
+GET {{base_url}}/api/v1/jobs
 
 ### jobs/{id}
-GET http://127.0.0.1:42038/api/v1/jobs/system
+GET {{base_url}}/api/v1/jobs/system
 
 ### jobs/{id}/queue
-POST http://127.0.0.1:42038/api/v1/jobs/system/queue
+POST {{base_url}}/api/v1/jobs/system/queue

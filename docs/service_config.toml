@@ -5,6 +5,28 @@
 # Type: int
 version = 1
 
+[api]
+
+# Enable or disable the REST API (optional)
+# Type: boolean
+# Default: true
+enabled = true
+
+# Port for the REST API to listen on (optional)
+# Type: int
+# Default: 42038
+port = 42038
+
+# Host for the REST API to bind to (optional)
+# Type: string
+# Default: "localhost"
+host = "localhost"
+
+# Number of worker threads for handling requests (optional)
+# Type: int
+# Default: 2
+workers = 2
+
 # Jobs configuration - define backup jobs by name
 # Type: object/map of job configurations
 # Default: empty (no jobs defined)

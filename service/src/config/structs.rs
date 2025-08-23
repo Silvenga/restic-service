@@ -4,8 +4,32 @@ use std::collections::HashMap;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ServiceConfiguration {
     pub version: u32,
+
     #[serde(default)]
     pub jobs: HashMap<String, ResticJob>,
+
+    #[serde(default)]
+    pub api: ApiConfiguration,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
+pub struct ApiConfiguration {
+    pub enabled: bool,
+    pub host: String,
+    pub port: u16,
+    pub workers: usize,
+}
+
+impl Default for ApiConfiguration {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            host: "localhost".to_owned(),
+            port: 42038,
+            workers: 2,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
