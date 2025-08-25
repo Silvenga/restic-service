@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+:root {
+    font-family: "Segoe UI Variable",
+    "Segoe UI",
+    "Segoe Fluent Icons",
+    "Segoe UI Symbol",
+    "Segoe MDL2 Assets",
+    system-ui,
+    sans-serif;
+
+    @apply bg-transparent text-zinc-900;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+}
+
+@utility drag-region {
+    app-region: drag;
+}

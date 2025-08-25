@@ -1,0 +1,44 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Restic Service Monitor",
+  "version": "0.1.0",
+  "identifier": "com.silvenga.restic-monitor",
+  "build": {
+    "beforeDevCommand": "yarn dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "yarn build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "security": {
+      "csp": null
+    },
+    "windows": [
+      {
+        "label": "status",
+        "title": "Restic Service Monitor",
+        "width": 580,
+        "height": 380,
+        "backgroundThrottling": "suspend",
+        "decorations": false,
+        "closable": true,
+        "resizable": false,
+        "minimizable": false,
+        "shadow": true,
+        "visible": false,
+        "transparent": true,
+        "center": true,
+        "windowEffects": {
+          "effects": [
+            "mica",
+            "acrylic",
+            "blur"
+          ]
+        }
+      }
+    ]
+  },
+  "bundle": {
+    "active": false
+  }
+}

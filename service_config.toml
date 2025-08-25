@@ -13,7 +13,7 @@ password = "LlENSonwkqNQ1c9zbv8M"
 
 [jobs.system.backup]
 exclude_caches = true
-sources = ["./restic-sdk"]
+sources = ["./src"]
 cleanup_cache = true
 use_fs_snapshot = false
 

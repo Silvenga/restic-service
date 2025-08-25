@@ -1,13 +1,6 @@
-use std::process::ExitCode;
+// Prevents additional console window on Windows in release, DO NOT REMOVE!!
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-#[cfg(windows)]
-fn main() -> ExitCode {
-    log_panics::init();
-
-    ExitCode::SUCCESS
-}
-
-#[cfg(not(windows))]
 fn main() {
-    panic!("This program is only intended to run on Windows.");
+    restic_montior_lib::run()
 }
