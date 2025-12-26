@@ -24,7 +24,7 @@ macro_rules! restic_message {
                 ExitError,
             }
         }
-        
+
         #[automatically_derived]
         impl $crate::parsing::ResticMessage for $enum_name {
             fn parse_message(message: &str) -> Result<Self, $crate::parsing::ParseError> {
@@ -33,4 +33,3 @@ macro_rules! restic_message {
         }
     };
 }
-

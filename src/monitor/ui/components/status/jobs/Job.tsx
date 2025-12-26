@@ -2,8 +2,8 @@ import { Pane } from "../../frame/Pane.tsx";
 import { Button } from "../../frame/Button.tsx";
 import { VscArchive } from "react-icons/vsc";
 import { TbPlayerPlay } from "react-icons/tb";
-import { useSuspense } from "@data-client/react";
-import { getJob } from "../../../api/jobs.ts";
+import { useController, useLive, useLoading } from "@data-client/react";
+import { getJob, queueJob } from "../../../api/jobs.ts";
 
 type JobProps = {
     jobId: string;
@@ -11,7 +11,23 @@ type JobProps = {
 
 export function Job({ jobId }: JobProps) {
 
-    const { job } = useSuspense(getJob, { jobId });
+    const { job } = useLive(getJob, { jobId });
+
+    const ctrl = useController();
+    const [handleQueueJob, loading, error] = useLoading(
+        async () => {
+            console.log("run start");
+
+            try {
+                await ctrl.fetchIfStale(queueJob, { id: jobId });
+            } catch (e) {
+                console.warn(e);
+            }
+
+            console.log("run done");
+        },
+        [ctrl, jobId],
+    );
 
     return (
         <Pane className="p-3 flex items-center">
@@ -25,7 +41,7 @@ export function Job({ jobId }: JobProps) {
                 </p>
             </div>
 
-            <Button className="flex items-center ms-auto">
+            <Button className="flex items-center ms-auto" disabled={loading} onClick={handleQueueJob}>
                 <TbPlayerPlay className="text-green-600 me-2" />
                 Run
             </Button>

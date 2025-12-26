@@ -1,6 +1,6 @@
 mod manager;
-mod structs;
 mod parser;
+mod structs;
 mod watcher;
 
 pub use manager::*;

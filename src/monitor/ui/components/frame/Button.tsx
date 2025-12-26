@@ -9,6 +9,7 @@ export function Button({ className, ...props }: ComponentProps<"button">) {
             "flex items-center justify-center",
             "min-w-32",
             "transition-colors duration-100",
+            props.disabled && "cursor-wait bg-neutral-100/50 opacity-80 shadow-none",
             className,
         )} {...props} />
     );

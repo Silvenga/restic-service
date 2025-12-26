@@ -226,12 +226,78 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@data-client/endpoint@npm:^0.14.26":
+"@data-client/core@npm:^0.14.24":
+  version: 0.14.24
+  resolution: "@data-client/core@npm:0.14.24"
+  dependencies:
+    "@babel/runtime": "npm:^7.20.0"
+    "@data-client/normalizr": "npm:^0.14.22"
+    flux-standard-action: "npm:^2.1.1"
+  checksum: 10c0/712eec60fe34b59fa827d14889d50f759a4866e8e3096006890734b26a5b69d0ec8658c729e952f7a8c0e0d6f44eb364637d7bd422bf91e6f5b42696311134d6
+  languageName: node
+  linkType: hard
+
+"@data-client/endpoint@npm:^0.14.25, @data-client/endpoint@npm:^0.14.26":
   version: 0.14.26
   resolution: "@data-client/endpoint@npm:0.14.26"
   dependencies:
     "@babel/runtime": "npm:^7.20.0"
   checksum: 10c0/5ab60041684da06761261711ff66233d34647e3bf5ddba33312173d2051f22334c70ec1faeeaf867ca6196b3f11d6bd6b7a41b814d16d36098ecf05293ed3cf2
+  languageName: node
+  linkType: hard
+
+"@data-client/normalizr@npm:^0.14.22":
+  version: 0.14.22
+  resolution: "@data-client/normalizr@npm:0.14.22"
+  dependencies:
+    "@babel/runtime": "npm:^7.20.0"
+  checksum: 10c0/d0033994af16812e74cc155830bc2dbc98c256a1b6b3afa63102e5a56d29d64f0c35da4b6fe1f9a1d0cc6a1592a4ea9ceb46b51bf6b134831262dcd0ccac5771
+  languageName: node
+  linkType: hard
+
+"@data-client/react@npm:^0.14.25":
+  version: 0.14.25
+  resolution: "@data-client/react@npm:0.14.25"
+  dependencies:
+    "@babel/runtime": "npm:^7.20.0"
+    "@data-client/core": "npm:^0.14.24"
+    "@data-client/use-enhanced-reducer": "npm:^0.1.14"
+  peerDependencies:
+    "@react-navigation/native": ^6.0.0 || ^7.0.0
+    "@types/react": ^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-0 || ^19.0.0
+    react: ^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-0 || ^19.0.0
+  peerDependenciesMeta:
+    "@react-navigation/native":
+      optional: true
+    "@types/react":
+      optional: true
+  checksum: 10c0/0db5c51f19cd82474d4bba1829d165718b5243f2cd103577571ab3051bc532e5404e8043f1b6b97dabec6392863812964aaae49c104859d745539071c70e94ce
+  languageName: node
+  linkType: hard
+
+"@data-client/rest@npm:^0.14.25":
+  version: 0.14.25
+  resolution: "@data-client/rest@npm:0.14.25"
+  dependencies:
+    "@babel/runtime": "npm:^7.20.0"
+    "@data-client/endpoint": "npm:^0.14.25"
+    path-to-regexp: "npm:^6.3.0"
+  checksum: 10c0/2e0c1982822aff9deed0284600e9b4e7f42582e019f4c5154774d44d24b504ac35323bdf54e26cdf629709a8d295f2331f5bf086c78b6ecfca059c6ed1f9d957
+  languageName: node
+  linkType: hard
+
+"@data-client/use-enhanced-reducer@npm:^0.1.14":
+  version: 0.1.14
+  resolution: "@data-client/use-enhanced-reducer@npm:0.1.14"
+  dependencies:
+    "@babel/runtime": "npm:^7.20.0"
+  peerDependencies:
+    "@types/react": ^16.14.0 || ^17.0.0 || ^18.0.0-0 || ^18.0.0 || ^19.0.0-0 || ^19.0.0
+    react: ^16.14.0 || ^17.0.0 || ^18.0.0-0 || ^18.0.0 || ^19.0.0-0 || ^19.0.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: 10c0/948ed0d25fa1d27f809c57608444c0480f9676ab0d83c0816e8f56626be58cc6f6490c48bdc0e63ea0b4fcb3839ff9e93c2208c9e959b7f200f7381d38a91f29
   languageName: node
   linkType: hard
 
@@ -1455,6 +1521,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"flux-standard-action@npm:^2.1.1":
+  version: 2.1.2
+  resolution: "flux-standard-action@npm:2.1.2"
+  dependencies:
+    lodash.isplainobject: "npm:^4.0.6"
+    lodash.isstring: "npm:^4.0.1"
+  checksum: 10c0/be76f35aa4ecf6f38dd39771e3b78e07ef1da4c3fb077a6e54c42fbadcbff5b2a016a036c7dcc1b5a4ebc5d303c09ebdd140498217c82873bc12779b421d1d70
+  languageName: node
+  linkType: hard
+
 "foreground-child@npm:^3.1.0":
   version: 3.3.1
   resolution: "foreground-child@npm:3.3.1"
@@ -1751,6 +1827,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash.isplainobject@npm:^4.0.6":
+  version: 4.0.6
+  resolution: "lodash.isplainobject@npm:4.0.6"
+  checksum: 10c0/afd70b5c450d1e09f32a737bed06ff85b873ecd3d3d3400458725283e3f2e0bb6bf48e67dbe7a309eb371a822b16a26cca4a63c8c52db3fc7dc9d5f9dd324cbb
+  languageName: node
+  linkType: hard
+
+"lodash.isstring@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "lodash.isstring@npm:4.0.1"
+  checksum: 10c0/09eaf980a283f9eef58ef95b30ec7fee61df4d6bf4aba3b5f096869cc58f24c9da17900febc8ffd67819b4e29de29793190e88dc96983db92d84c95fa85d1c92
+  languageName: node
+  linkType: hard
+
 "lru-cache@npm:^10.0.1, lru-cache@npm:^10.2.0":
   version: 10.4.3
   resolution: "lru-cache@npm:10.4.3"
@@ -1894,6 +1984,8 @@ __metadata:
   resolution: "monitor@workspace:."
   dependencies:
     "@data-client/endpoint": "npm:^0.14.26"
+    "@data-client/react": "npm:^0.14.25"
+    "@data-client/rest": "npm:^0.14.25"
     "@tailwindcss/vite": "npm:^4.1.12"
     "@tauri-apps/api": "npm:^2"
     "@tauri-apps/cli": "npm:^2"
@@ -2002,6 +2094,13 @@ __metadata:
     lru-cache: "npm:^10.2.0"
     minipass: "npm:^5.0.0 || ^6.0.2 || ^7.0.0"
   checksum: 10c0/32a13711a2a505616ae1cc1b5076801e453e7aae6ac40ab55b388bb91b9d0547a52f5aaceff710ea400205f18691120d4431e520afbe4266b836fadede15872d
+  languageName: node
+  linkType: hard
+
+"path-to-regexp@npm:^6.3.0":
+  version: 6.3.0
+  resolution: "path-to-regexp@npm:6.3.0"
+  checksum: 10c0/73b67f4638b41cde56254e6354e46ae3a2ebc08279583f6af3d96fe4664fc75788f74ed0d18ca44fa4a98491b69434f9eee73b97bb5314bd1b5adb700f5c18d6
   languageName: node
   linkType: hard
 

@@ -1,4 +1,4 @@
-import { useSuspense } from "@data-client/react";
+import { useLive } from "@data-client/react";
 import { Pane } from "../../frame/Pane.tsx";
 import { Job } from "./Job.tsx";
 import { MdSchedule } from "react-icons/md";
@@ -28,10 +28,12 @@ export function Jobs() {
 }
 
 function JobList() {
-    const jobIds = useSuspense(getJobIds);
+    const jobIds = useLive(getJobIds);
     return (
         <>
-            {jobIds.map((jobId) => (<Job jobId={jobId} />))}
+            {jobIds.map((jobId) => (
+                <Job key={jobId} jobId={jobId} />
+            ))}
         </>
     );
 }

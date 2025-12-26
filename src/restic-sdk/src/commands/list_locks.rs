@@ -152,6 +152,9 @@ mod tests {
         assert_eq!(lock.hostname, "myhost");
         assert_eq!(lock.username, "myuser");
         assert_eq!(lock.pid, 12345);
-        assert_eq!(lock.time.to_rfc3339(), "2025-07-06T23:56:28.886047800+00:00");
+        assert_eq!(
+            lock.time.to_rfc3339(),
+            "2025-07-06T23:56:28.886047800+00:00"
+        );
     }
 }

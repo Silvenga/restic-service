@@ -8,6 +8,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/restic-sdk/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/restic-sdk/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/service/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/installer/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

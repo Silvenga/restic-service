@@ -20,3 +20,4 @@ target/
 
 /target
 /restic-repo
+/src/monitor/dist

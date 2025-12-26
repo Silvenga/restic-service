@@ -26,3 +26,22 @@ Configure the service by editing `C:\Program Files\Restic Service\service_config
 picked up by the service (running jobs will be gracefully stopped).
 
 An example configuration file is in [`./docs/service_config.toml`](./docs/service_config.toml).
+
+## Building
+
+Assumes rust (>= 1.91) and node (LTS) are installed.
+
+```pwsh
+# Installer:
+winget install WiXToolset.WiXCLI
+wix extension add -g WixToolset.UI.wixet
+
+# Building
+cargo install --force cargo-make
+
+# UI
+corepack enable
+
+# Build the service/UI/installer
+cargo make release
+```

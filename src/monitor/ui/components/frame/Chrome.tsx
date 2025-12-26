@@ -1,6 +1,7 @@
-import { PropsWithChildren, Suspense, useCallback } from "react";
+import { PropsWithChildren, ReactNode, useCallback } from "react";
 import { twMerge } from "tailwind-merge";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { AsyncBoundary } from "@data-client/react";
 
 type ChromeProps = {
     minimize?: boolean;
@@ -48,9 +49,9 @@ export function Chrome(props: PropsWithChildren<ChromeProps>) {
                 </div>
             </div>
             <div className={twMerge("absolute inset-0 top-[32px] overflow-auto", className)}>
-                <Suspense>
+                <AsyncBoundary>
                     {children}
-                </Suspense>
+                </AsyncBoundary>
             </div>
         </div>
     );

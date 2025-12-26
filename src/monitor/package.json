@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@data-client/endpoint": "^0.14.26",
+    "@data-client/react": "^0.14.25",
+    "@data-client/rest": "^0.14.25",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-autostart": "~2",
     "@tauri-apps/plugin-opener": "^2",

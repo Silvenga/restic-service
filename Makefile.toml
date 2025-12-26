@@ -1,0 +1,44 @@
+[tasks.build]
+workspace = false
+command = "cargo"
+args = ["build", "--release"]
+
+[tasks.test]
+workspace = false
+command = "cargo"
+args = ["test", "--release"]
+
+[tasks.monitor]
+workspace = false
+cwd = "./src/monitor"
+command = "cargo"
+args = ["tauri", "build", "--no-bundle"]
+
+[tasks.installer]
+workspace = false
+cwd = "./src/installer"
+command = "wix"
+args = [
+    "build",
+    "main.wxs",
+    "-arch",
+    "x64",
+    "-defaultcompressionlevel",
+    "high",
+    "-define",
+    "Version=1.0.0",
+    "-define",
+    "CargoTargetBinDir=../../target/release/",
+    "-out",
+    "../../target/release/restic-service-installer.msi",
+    "-ext",
+    "WixToolset.UI.wixext",
+]
+
+[tasks.release]
+workspace = false
+dependencies = [
+    "build",
+    "monitor",
+    "installer",
+]

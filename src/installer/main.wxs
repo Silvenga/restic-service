@@ -1,0 +1,61 @@
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+    <Package Name="Restic Service" UpgradeCode="5FE355A4-E84D-4AD1-92D6-BE51FD1DE867"
+             Manufacturer="Mark Lopez (Silvenga)" Language="1033" Codepage="1252" Version="$(var.Version)"
+             InstallerVersion="450">
+        <SummaryInformation Keywords="Installer"
+                            Description="A simple service for Windows that hosts and executes restic backup/forget runs."
+                            Manufacturer="Mark Lopez (Silvenga)"/>
+
+        <MajorUpgrade Schedule="afterInstallInitialize"
+                      DowngradeErrorMessage="A newer version of [ProductName] is already installed. Setup will now exit."/>
+
+        <Media Id="1" Cabinet="media1.cab" EmbedCab="yes"/>
+        <Property Id="DiskPrompt" Value="Restic Service Installation"/>
+
+        <Feature Id="Binaries" ConfigurableDirectory="APPLICATIONFOLDER">
+            <ComponentRef Id="License"/>
+            <ComponentRef Id="DefaultConfig"/>
+            <ComponentRef Id="Service"/>
+            <ComponentRef Id="Monitor"/>
+        </Feature>
+
+        <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONFOLDER"/>
+        <Property Id="ARPHELPLINK" Value="https://github.com/Silvenga/restic-service"/>
+
+        <UI>
+            <ui:WixUI Id="WixUI_InstallDir"/>
+            <UIRef Id="WixUI_ErrorProgressText" />
+        </UI>
+
+        <WixVariable Id="WixUILicenseRtf" Value="License.rtf"/>
+
+        <StandardDirectory Id="ProgramFiles64Folder">
+            <Directory Id="APPLICATIONFOLDER" Name="Restic Service">
+
+                <Component Id="License">
+                    <File Id="LicenseFile" DiskId="1" Source="License.rtf" KeyPath="yes"/>
+                </Component>
+
+                <Component Id="DefaultConfig">
+                    <File Id="DefaultConfigFile" DiskId="1" Source="service_config.toml" KeyPath="yes"/>
+                </Component>
+                <Component Id="Service">
+                    <File Id="Bin" Name="restic-service.exe" DiskId="1"
+                          Source="$(var.CargoTargetBinDir)\service.exe" KeyPath="yes"/>
+                    <ServiceInstall Id="ServiceInstaller" Type="ownProcess" Name="Silvenga.ResticService"
+                                    DisplayName="Restic Service"
+                                    Description="A simple service for Windows that hosts and executes restic backup/forget runs."
+                                    Start="auto" ErrorControl="normal" Account="LocalSystem"/>
+                    <ServiceControl Id="StartService" Start="install" Stop="both" Remove="uninstall"
+                                    Name="Silvenga.ResticService" Wait="yes"/>
+                </Component>
+                <Component Id="Monitor">
+                    <File Id="MonitorFile" Name="restic-monitor.exe" DiskId="1"
+                          Source="$(var.CargoTargetBinDir)\monitor.exe" KeyPath="yes"/>
+                </Component>
+            </Directory>
+        </StandardDirectory>
+    </Package>
+
+</Wix>

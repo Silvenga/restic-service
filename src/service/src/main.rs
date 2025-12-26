@@ -8,16 +8,16 @@ pub(crate) mod management;
 pub(crate) mod paths;
 pub(crate) mod service;
 
-use crate::cli::{parse_args, Verb};
+use crate::cli::{Verb, parse_args};
 use crate::host::ServiceHost;
 use crate::management::{
-    install_service, restart_service, start_service, status_service, stop_service, uninstall_service,
-    SERVICE_NAME,
+    SERVICE_NAME, install_service, restart_service, start_service, status_service, stop_service,
+    uninstall_service,
 };
 use crate::paths::get_exe_directory;
 use crate::service::ServiceStatusHandlerExtension;
 use flexi_logger::{
-    detailed_format, AdaptiveFormat, Cleanup, Criterion, FileSpec, Logger, Naming, WriteMode,
+    AdaptiveFormat, Cleanup, Criterion, FileSpec, Logger, Naming, WriteMode, detailed_format,
 };
 use log::info;
 use std::env;

@@ -22,58 +22,51 @@ jobs:
       - name: Install Restic
         shell: pwsh
         run: |
-          winget install --exact --id restic.restic --scope Machine --accept-source-agreements --accept-source-agreements
+          winget install --exact --id restic.restic --scope Machine --accept-source-agreements --accept-package-agreements
           "C:\Program Files\WinGet\Links\" >> $env:GITHUB_PATH
       - name: Test
         run: cargo test --no-fail-fast
 
-  build-service:
-    name: Build Service
-    needs: check
+  build:
+    name: Build
     runs-on: windows-2025
     steps:
       - uses: actions/checkout@v4
+      # Rust
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
-
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.1
+      - name: Install Cargo Make
+        run: |
+          cargo install cargo-make
+          cargo install tauri-cli
+      # WiX
       - name: Install WiX
         run: |
-          dotnet tool install --global wix
-          cargo install cargo-wix
-
-      - name: Build Installer
-        shell: pwsh
+          winget install WiXToolset.WiXCLI --accept-source-agreements --accept-package-agreements
+          "C:\Program Files\WiX Toolset v6.0\bin\" >> $env:GITHUB_PATH
+      - name: Install WiX Extension
         run: |
-          cd ./src/service/
-          cargo wix --verbose --package service --output restic-service-installer.msi
+          wix extension add -g WixToolset.UI.wixext
+
+      # Node
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Restore Yarn Dependencies
+        env:
+          YARN_GLOBAL_FOLDER: ${{ github.workspace }}/.yarn/global
+        run: |
+          cd src/monitor
+          corepack enable
+          yarn install
+
+      - name: Build Release
+        run: |
+          cargo make release
 
       - uses: actions/upload-artifact@v4
         with:
-          name: service
+          name: installer
           path: |
-            src/service/restic-service-installer.msi
-
-  build-monitor:
-    name: Build Monitor
-    needs: check
-    runs-on: windows-2025
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: stable
-
-      - name: Build Installer
-        shell: pwsh
-        run: |
-          cd ./src/monitor/
-          cargo build --release
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: monitor
-          path: |
-            target/release/restic-monitor.exe
+            target/release/restic-service-installer.msi
