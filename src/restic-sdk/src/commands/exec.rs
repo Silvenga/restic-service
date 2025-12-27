@@ -1,7 +1,7 @@
 use crate::errors::{ResticError, map_exit_code_to_error};
 use crate::parsing::ResticMessage;
 use crate::{ArgumentsBuilder, Restic};
-use log::{debug, warn};
+use log::{debug, info, warn};
 use pathsearch::find_executable_in_path;
 use std::ffi::OsString;
 use std::fmt::Display;
@@ -24,8 +24,10 @@ impl Restic {
     {
         let start = async || -> Result<ExitStatus, io::Error> {
             let binary_path = Self::get_binary_path()?;
+            let arguments = arguments.build();
+            info!("Executing restic command: '{binary_path:?} {arguments:?}'");
             let mut process = Command::new(binary_path)
-                .args(arguments.build())
+                .args(arguments)
                 .stdin(Stdio::null())
                 .stdout(Stdio::piped())
                 .stderr(Stdio::piped())

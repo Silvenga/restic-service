@@ -7,14 +7,13 @@ use tokio_util::sync::CancellationToken;
 impl Restic {
     pub async fn backup(
         &self,
-        paths: impl IntoIterator<Item = impl BuilderValue>,
+        paths: impl IntoIterator<Item = impl Into<String>>,
         options: BackupOptions,
         cancellation_token: &CancellationToken,
     ) -> Result<BackupResult, ResticError> {
         let arguments = options
             .builder
-            .with_verb("backup")
-            .with_values(paths.into_iter().map(|v| v.to_builder_value()));
+            .with_values(paths);
 
         let mut summary: Option<BackupSummary> = None;
 
@@ -72,9 +71,17 @@ pub struct BackupResult {
     pub summary: BackupSummary,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct BackupOptions {
     builder: ArgumentsBuilder,
+}
+
+impl Default for BackupOptions {
+    fn default() -> Self {
+        Self {
+            builder: ArgumentsBuilder::new().with_verb("backup"),
+        }
+    }
 }
 
 impl BackupOptions {

@@ -21,3 +21,4 @@ target/
 /target
 /restic-repo
 /src/monitor/dist
+/src/monitor/.yarn

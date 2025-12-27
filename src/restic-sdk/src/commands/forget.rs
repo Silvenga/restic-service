@@ -10,7 +10,7 @@ impl Restic {
         cancellation_token: &CancellationToken,
     ) -> Result<(), ResticError> {
         self.exec(
-            options.builder.with_verb("forget"),
+            options.builder,
             |string, output_type| {
                 debug!("Restic {output_type:?}: {string}");
             },
@@ -22,12 +22,21 @@ impl Restic {
 }
 
 /// Options for the `restic forget` command.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct ForgetOptions {
     builder: ArgumentsBuilder,
 }
 
+impl Default for ForgetOptions {
+    fn default() -> Self {
+        Self {
+            builder: ArgumentsBuilder::new().with_verb("forget"),
+        }
+    }
+}
+
 impl ForgetOptions {
+    /// Creates a default `ForgetOptions` instance.
     pub fn new() -> Self {
         Self::default()
     }

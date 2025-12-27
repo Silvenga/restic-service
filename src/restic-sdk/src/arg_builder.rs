@@ -1,16 +1,16 @@
-use std::collections::HashSet;
+use ordermap::OrderSet;
 
 #[derive(Debug, Clone, Default)]
 pub struct ArgumentsBuilder {
-    verb: Option<String>,
-    values: Vec<String>,
-    arguments: HashSet<Argument>,
+    arguments: OrderSet<Argument>,
 }
 
-#[derive(Debug, Clone, Default, Eq, Hash, PartialEq)]
-struct Argument {
-    name: String,
-    value: Option<String>,
+#[derive(Debug, Clone, Eq, Hash, PartialEq, Ord, PartialOrd)]
+enum Argument {
+    Verb { verb: String },
+    Flag { name: String },
+    FlagWithValue { name: String, value: String },
+    Value { value: String },
 }
 
 impl ArgumentsBuilder {
@@ -18,57 +18,63 @@ impl ArgumentsBuilder {
         Self::default()
     }
 
-    pub fn with_verb(mut self, verb: &str) -> Self {
-        self.verb = Some(String::from(verb));
-        self
+    pub fn with_verb(self, verb: impl Into<String>) -> Self {
+        self.push_argument(Argument::Verb { verb: verb.into() })
     }
 
-    pub fn with_flag_and_value<V: BuilderValue>(mut self, name: &str, value: V) -> Self {
-        self.arguments.insert(Argument {
-            name: String::from(name),
-            value: Some(value.to_builder_value()),
-        });
-        self
+    pub fn with_flag_and_value<V: BuilderValue>(self, name: impl Into<String>, value: V) -> Self {
+        self.push_argument(Argument::FlagWithValue {
+            name: name.into(),
+            value: value.to_builder_value(),
+        })
     }
 
-    pub fn with_flag(mut self, name: &str) -> Self {
-        self.arguments.insert(Argument {
-            name: String::from(name),
-            value: None,
-        });
-        self
+    pub fn with_flag(self, name: impl Into<String>) -> Self {
+        self.push_argument(Argument::Flag { name: name.into() })
     }
 
-    pub fn with_value(mut self, value: &str) -> Self {
-        self.values = vec![String::from(value)];
-        self
+    pub fn with_value(self, value: impl Into<String>) -> Self {
+        self.push_argument(Argument::Value {
+            value: value.into(),
+        })
     }
 
-    pub fn with_values(mut self, values: impl IntoIterator<Item = impl BuilderValue>) -> Self {
-        self.values = values.into_iter().map(|x| x.to_builder_value()).collect();
+    pub fn with_values(mut self, values: impl IntoIterator<Item = impl Into<String>>) -> Self {
+        for value in values {
+            self.arguments.insert(Argument::Value {
+                value: value.into(),
+            });
+        }
         self
     }
 
     pub fn build(self) -> Vec<String> {
         let mut full_arguments = vec![];
 
-        if let Some(verb) = self.verb {
-            full_arguments.push(verb);
-        }
-
-        for arg in self.arguments {
-            full_arguments.push(format!("--{}", arg.name));
-
-            if let Some(value) = arg.value {
-                full_arguments.push(value);
+        for argument in self.arguments {
+            match argument {
+                Argument::Verb { verb } => {
+                    full_arguments.push(verb);
+                }
+                Argument::Flag { name } => {
+                    full_arguments.push(format!("--{}", name));
+                }
+                Argument::FlagWithValue { name, value } => {
+                    full_arguments.push(format!("--{}", name));
+                    full_arguments.push(value);
+                }
+                Argument::Value { value } => {
+                    full_arguments.push(value);
+                }
             }
         }
 
-        for value in self.values {
-            full_arguments.push(value);
-        }
-
         full_arguments
+    }
+
+    fn push_argument(mut self, argument: Argument) -> Self {
+        self.arguments.insert(argument);
+        self
     }
 }
 
@@ -155,6 +161,16 @@ mod tests {
             .with_value("end_value")
             .build();
         assert_eq!(command, vec!["--flag", "value", "end_value"]);
+    }
+
+    #[test]
+    fn when_value_flag_and_verb_then_ordered_correctly() {
+        let command = ArgumentsBuilder::new()
+            .with_verb("list")
+            .with_value("locks")
+            .with_flag("json")
+            .build();
+        assert_eq!(command, vec!["list", "locks", "--json"]);
     }
 
     #[test]

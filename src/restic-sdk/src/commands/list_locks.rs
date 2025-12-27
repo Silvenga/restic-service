@@ -40,13 +40,16 @@ impl Restic {
                 .with_verb("list")
                 .with_value("locks")
                 .with_flag("json"),
-            |message, output_type| {
-                if output_type == MessageOutputType::Stdout {
+            |message, output_type| match output_type {
+                MessageOutputType::Stdout => {
                     if message.len() == 64 {
                         locks.insert(message);
                     } else {
                         warn!("Ignored lock id with unexpected length: '{message}'");
                     }
+                }
+                MessageOutputType::Stderr => {
+                    warn!("{output_type}: {message}");
                 }
             },
             cancellation_token,
@@ -69,7 +72,7 @@ impl Restic {
         self.exec(
             ArgumentsBuilder::new()
                 .with_verb("cat")
-                .with_values(["locks", id])
+                .with_values(["lock", id])
                 .with_flag("json"),
             |message, output_type| {
                 if output_type == MessageOutputType::Stdout {
