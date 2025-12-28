@@ -931,10 +931,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tauri-apps/api@npm:^2, @tauri-apps/api@npm:^2.6.0, @tauri-apps/api@npm:^2.8.0":
+"@tauri-apps/api@npm:^2.8.0":
   version: 2.8.0
   resolution: "@tauri-apps/api@npm:2.8.0"
   checksum: 10c0/fb111e4d7572372997b440ebe6879543fa8c4765151878e3fddfbfe809b18da29eed142ce83061d14a9ca6d896b3266dc8a4927c642d71cdc0b4277dc7e3aabf
+  languageName: node
+  linkType: hard
+
+"@tauri-apps/api@npm:^2.9.1":
+  version: 2.9.1
+  resolution: "@tauri-apps/api@npm:2.9.1"
+  checksum: 10c0/18c76ec58b579860bfde5cd5b5ea6c3b13019d356c17d436bf395cafdf15dd1f277364cacd24cc94e5d4aa3816f39698f231773d2a18625e98702295ab0c2c8f
   languageName: node
   linkType: hard
 
@@ -1059,30 +1066,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tauri-apps/plugin-autostart@npm:~2":
-  version: 2.5.0
-  resolution: "@tauri-apps/plugin-autostart@npm:2.5.0"
-  dependencies:
-    "@tauri-apps/api": "npm:^2.6.0"
-  checksum: 10c0/8646ef6e3d48c1293e28ae3ac9a39bfc99ee76cd85869ba523ccca8db4eae46b36d3efb1424ac2ac8198b7e870fc34f2b442d3f3ce0a5f933e2af2c49656daa1
-  languageName: node
-  linkType: hard
-
-"@tauri-apps/plugin-opener@npm:^2":
-  version: 2.5.0
-  resolution: "@tauri-apps/plugin-opener@npm:2.5.0"
+"@tauri-apps/plugin-autostart@npm:^2.5.1":
+  version: 2.5.1
+  resolution: "@tauri-apps/plugin-autostart@npm:2.5.1"
   dependencies:
     "@tauri-apps/api": "npm:^2.8.0"
-  checksum: 10c0/31503644c64678e5f5d1d995c0db145a3dabeb1bef1b9f7cfef84a83e4188c169f630207705fc6484f9e1934be6bd59de50676e4b9f1e2f628d1b54e38f00dbd
+  checksum: 10c0/b66fe2b87fd77e4b2c73b04fb93b34ba1fea32cadf74c01da6df037a508ca8c03aba9bcf9ef13e949effc219b26936d0596717f0d031ee552d60c069406026dd
   languageName: node
   linkType: hard
 
-"@tauri-apps/plugin-positioner@npm:~2":
-  version: 2.3.0
-  resolution: "@tauri-apps/plugin-positioner@npm:2.3.0"
+"@tauri-apps/plugin-opener@npm:^2.5.2":
+  version: 2.5.2
+  resolution: "@tauri-apps/plugin-opener@npm:2.5.2"
   dependencies:
-    "@tauri-apps/api": "npm:^2.6.0"
-  checksum: 10c0/da198a3187e5643b46577b92fc5afbdf06482a8a6ff45de68ba75722c6c159caf7382867533a6b30b095a940f9ffc1072a69637fe021057f0ba7d658b8c58547
+    "@tauri-apps/api": "npm:^2.8.0"
+  checksum: 10c0/b10c39063c59ca71e5a5c43bb93da34387a7e707d1baf65a53110141f1a973ce2b73f19be9f63d9312c030760ba2b876ad3069b9a123abb4883e025059a15c3f
+  languageName: node
+  linkType: hard
+
+"@tauri-apps/plugin-positioner@npm:^2.3.1":
+  version: 2.3.1
+  resolution: "@tauri-apps/plugin-positioner@npm:2.3.1"
+  dependencies:
+    "@tauri-apps/api": "npm:^2.8.0"
+  checksum: 10c0/aa855d220b84e57471ec6e2963ba1bb70c222b3d6d0c9ad36fdb375ce2f8a212b54e7e3eca92fe77475621febb312880400afa5f7abe55a5f47df661a2094a5d
   languageName: node
   linkType: hard
 
@@ -1987,11 +1994,11 @@ __metadata:
     "@data-client/react": "npm:^0.14.25"
     "@data-client/rest": "npm:^0.14.25"
     "@tailwindcss/vite": "npm:^4.1.12"
-    "@tauri-apps/api": "npm:^2"
+    "@tauri-apps/api": "npm:^2.9.1"
     "@tauri-apps/cli": "npm:^2"
-    "@tauri-apps/plugin-autostart": "npm:~2"
-    "@tauri-apps/plugin-opener": "npm:^2"
-    "@tauri-apps/plugin-positioner": "npm:~2"
+    "@tauri-apps/plugin-autostart": "npm:^2.5.1"
+    "@tauri-apps/plugin-opener": "npm:^2.5.2"
+    "@tauri-apps/plugin-positioner": "npm:^2.3.1"
     "@types/react": "npm:^19.1.8"
     "@types/react-dom": "npm:^19.1.6"
     "@vitejs/plugin-react": "npm:^4.6.0"
