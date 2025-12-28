@@ -1,4 +1,7 @@
 use crate::errors::{ResticError, map_exit_code_to_error};
+use crate::extensions::stop_process::{
+    CREATE_NEW_CONSOLE, CREATE_NEW_PROCESS_GROUP, start_stop_process,
+};
 use crate::parsing::ResticMessage;
 use crate::{ArgumentsBuilder, Restic};
 use log::{debug, info, warn};
@@ -32,6 +35,7 @@ impl Restic {
                 .stdout(Stdio::piped())
                 .stderr(Stdio::piped())
                 .envs(self.config.environment.clone())
+                .creation_flags(CREATE_NEW_PROCESS_GROUP | CREATE_NEW_CONSOLE)
                 .kill_on_drop(true)
                 .spawn()?;
 
@@ -63,8 +67,8 @@ impl Restic {
                         }
                     },
                     _ = cancellation_token.cancelled(), if !stderr_complete && !stdout_complete => {
-                        debug!("Cancellation token triggered, killing process.");
-                        process.start_kill()?;
+                        debug!("Cancellation token triggered, stopping process.");
+                        start_stop_process(&mut process).await?;
                         break;
                     },
                     else => {
