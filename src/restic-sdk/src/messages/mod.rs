@@ -1,6 +1,7 @@
+mod restic_message;
+
 mod backup;
 mod exit_error;
-mod helpers;
 mod init;
 mod version;
 
